@@ -1,0 +1,1 @@
+<li <?php if ($_SERVER['REQUEST_URI'] == '/account/facebook/') echo 'class="active"'; ?>><a href="/account/facebook/">Facebook</a></li>
