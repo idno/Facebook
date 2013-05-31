@@ -27,7 +27,7 @@
                             $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
                             $facebookAPI->api('/me/feed', 'POST',
                                 array(
-                                    'message' => $object->getDescription()
+                                    'message' => strip_tags($object->getDescription())
                                 ));
                         }
                     }
