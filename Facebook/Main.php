@@ -25,10 +25,13 @@
                     if ($this->hasFacebook()) {
                         if ($facebookAPI = $this->connect()) {
                             $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
-                            $facebookAPI->api('/me/feed', 'POST',
-                                array(
-                                    'message' => strip_tags($object->getDescription())
-                                ));
+                            $message = strip_tags($object->getDescription());
+                            if (!empty($message) && substr($message,0,1) != '@') {
+                                $facebookAPI->api('/me/feed', 'POST',
+                                    array(
+                                        'message' => strip_tags($object->getDescription())
+                                    ));
+                            }
                         }
                     }
                 });
