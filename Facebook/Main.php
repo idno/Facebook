@@ -50,6 +50,35 @@
                         }
                     }
                 });
+
+                // Push "images" to Facebook
+                \Idno\Core\site()->addEventHook('post/image',function(\Idno\Core\Event $event) {
+                    $object = $event->data()['object'];
+                    if ($attachments = $object->getAttachments()) {
+                        foreach($attachments as $attachment) {
+                            if ($this->hasFacebook()) {
+                                if ($facebookAPI = $this->connect()) {
+                                    $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
+                                    $message = strip_tags($object->getDescription());
+                                    try {
+                                        $facebookAPI->setFileUploadSupport(true);
+                                        $response = $facebookAPI->api(
+                                            '/me/photos/',
+                                            'post',
+                                            array(
+                                                'message' => $message,
+                                                'url' => $attachment['url']
+                                            )
+                                        );
+                                    }
+                                    catch (\FacebookApiException $e) {
+                                        error_log('Could not post image to Facebook: ' . $e->getMessage());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
             }
 
             /**

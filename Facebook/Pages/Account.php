@@ -19,7 +19,7 @@
                     if (!$facebook->hasFacebook()) {
                         if ($facebookAPI = $facebook->connect()) {
                             $login_url = $facebookAPI->getLoginUrl(array(
-                                'scope' => 'publish_stream,offline_access',
+                                'scope' => 'publish_stream,offline_access,user_photos',
                                 'redirect_uri' => \Idno\Core\site()->config()->url . 'facebook/callback',
                                 'cancel_url' => \Idno\Core\site()->config()->url . 'account/facebook/',
                             ));
