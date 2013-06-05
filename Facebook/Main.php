@@ -27,10 +27,13 @@
                             $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
                             $message = strip_tags($object->getDescription());
                             if (!empty($message) && substr($message,0,1) != '@') {
-                                $facebookAPI->api('/me/feed', 'POST',
-                                    array(
-                                        'message' => strip_tags($object->getDescription())
-                                    ));
+                                $params = array(
+                                    'message' => $message
+                                );
+                                if (preg_match('/(?<!=)(?<!["\'])((ht|f)tps?:\/\/[^\s\r\n\t<>"\'\(\)]+)/i',$message,$matches)) {
+                                    $params['link'] = $matches[0];  // Set the first discovered link as the match
+                                }
+                                $facebookAPI->api('/me/feed', 'POST', $params);
                             }
                         }
                     }
