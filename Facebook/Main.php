@@ -33,7 +33,11 @@
                                 if (preg_match('/(?<!=)(?<!["\'])((ht|f)tps?:\/\/[^\s\r\n\t<>"\'\(\)]+)/i',$message,$matches)) {
                                     $params['link'] = $matches[0];  // Set the first discovered link as the match
                                 }
-                                $facebookAPI->api('/me/feed', 'POST', $params);
+                                try {
+                                    $facebookAPI->api('/me/feed', 'POST', $params);
+                                } catch (\Exception $e) {
+                                    \Idno\Core\site()->session()->addMessage('There was a problem posting to Facebook: ' . $e->getMessage());
+                                }
                             }
                         }
                     }
