@@ -26,6 +26,7 @@
                         if ($facebookAPI = $this->connect()) {
                             $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
                             $message = strip_tags($object->getDescription());
+                            $message .= "\n\nOriginal: " . $object->getURL();
                             if (!empty($message) && substr($message,0,1) != '@') {
                                 $params = array(
                                     'message' => $message
@@ -75,6 +76,7 @@
                                 if ($facebookAPI = $this->connect()) {
                                     $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
                                     $message = strip_tags($object->getDescription());
+									$message .= "\n\nOriginal: " . $object->getURL();
                                     try {
                                         $facebookAPI->setFileUploadSupport(true);
                                         $response = $facebookAPI->api(
