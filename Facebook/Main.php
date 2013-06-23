@@ -36,7 +36,7 @@
                                 try {
                                     $result = $facebookAPI->api('/me/feed', 'POST', $params);
                                     if (!empty($result['id'])) {
-										$object->setPosseLink('facebook','https://facebook.com/' . $result['id');
+										$object->setPosseLink('facebook','https://facebook.com/' . $result['id']);
 										$object->save();
 									}
                                 } catch (\Exception $e) {
@@ -59,7 +59,7 @@
                                     'message' => $object->getTitle()
                                 ));
                             if (!empty($result['id'])) {
-								$object->setPosseLink('facebook','https://facebook.com/' . $response['id');
+								$object->setPosseLink('facebook','https://facebook.com/' . $response['id']);
 								$object->save();
 							}
                         }
@@ -86,7 +86,7 @@
                                             )
                                         );
                                         if (!empty($response['id'])) {
-                                        	$object->setPosseLink('facebook','https://facebook.com/' . $response['id');
+                                        	$object->setPosseLink('facebook','https://facebook.com/' . $response['id']);
                                         	$object->save();
                                         }
                                     }
