@@ -34,7 +34,10 @@
                                     $params['link'] = $matches[0];  // Set the first discovered link as the match
                                 }
                                 try {
-                                    $facebookAPI->api('/me/feed', 'POST', $params);
+                                    $result = $facebookAPI->api('/me/feed', 'POST', $params);
+                                    if (!empty($result['id'])) {
+    									$object->setPosseLink('facebook','https://facebook.com/' . $result['id');
+									}
                                 } catch (\Exception $e) {
                                     \Idno\Core\site()->session()->addMessage('There was a problem posting to Facebook: ' . $e->getMessage());
                                 }
@@ -49,11 +52,14 @@
                     if ($this->hasFacebook()) {
                         if ($facebookAPI = $this->connect()) {
                             $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
-                            $facebookAPI->api('/me/feed', 'POST',
+                            $result = $facebookAPI->api('/me/feed', 'POST',
                                 array(
                                     'link' => $object->getURL(),
                                     'message' => $object->getTitle()
                                 ));
+                            if (!empty($result['id'])) {
+								$object->setPosseLink('facebook','https://facebook.com/' . $response['id');
+							}
                         }
                     }
                 });
@@ -77,6 +83,9 @@
                                                 'url' => $attachment['url']
                                             )
                                         );
+                                        if (!empty($response['id'])) {
+                                        	$object->setPosseLink('facebook','https://facebook.com/' . $response['id');
+                                        }
                                     }
                                     catch (\FacebookApiException $e) {
                                         error_log('Could not post image to Facebook: ' . $e->getMessage());
