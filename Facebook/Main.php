@@ -36,7 +36,8 @@
                                 try {
                                     $result = $facebookAPI->api('/me/feed', 'POST', $params);
                                     if (!empty($result['id'])) {
-    									$object->setPosseLink('facebook','https://facebook.com/' . $result['id');
+										$object->setPosseLink('facebook','https://facebook.com/' . $result['id');
+										$object->save();
 									}
                                 } catch (\Exception $e) {
                                     \Idno\Core\site()->session()->addMessage('There was a problem posting to Facebook: ' . $e->getMessage());
@@ -59,6 +60,7 @@
                                 ));
                             if (!empty($result['id'])) {
 								$object->setPosseLink('facebook','https://facebook.com/' . $response['id');
+								$object->save();
 							}
                         }
                     }
@@ -85,6 +87,7 @@
                                         );
                                         if (!empty($response['id'])) {
                                         	$object->setPosseLink('facebook','https://facebook.com/' . $response['id');
+                                        	$object->save();
                                         }
                                     }
                                     catch (\FacebookApiException $e) {
