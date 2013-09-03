@@ -16,13 +16,16 @@
                 // Add menu items to account & administration screens
                     \Idno\Core\site()->template()->extendTemplate('admin/menu/items','admin/facebook/menu');
                     \Idno\Core\site()->template()->extendTemplate('account/menu/items','account/facebook/menu');
+                    
+                // Add POSSE button
+					\Idno\Core\site()->template()->extendTemplate('content/possebuttons', 'forms/posse/facebook');
             }
 
             function registerEventHooks() {
                 // Push "notes" to Facebook
                 \Idno\Core\site()->addEventHook('post/note',function(\Idno\Core\Event $event) {
 					
-					if (in_array('facebook', $_REQUEST['posseMethod'])) { // TODO: Use the correct input functions
+					if ((!empty($_REQUEST['posseMethod'])) && (in_array('facebook', $_REQUEST['posseMethod']))) { // TODO: Use the correct input functions
 						$object = $event->data()['object'];
 						if ($this->hasFacebook()) {
 							if ($facebookAPI = $this->connect()) {
@@ -53,7 +56,7 @@
 
                 // Push "articles" to Facebook
                 \Idno\Core\site()->addEventHook('post/article',function(\Idno\Core\Event $event) {
-					if (in_array('facebook', $_REQUEST['posseMethod'])) { // TODO: Use the correct input functions
+					if ((!empty($_REQUEST['posseMethod'])) && (in_array('facebook', $_REQUEST['posseMethod']))) { // TODO: Use the correct input functions
 						$object = $event->data()['object'];
 						if ($this->hasFacebook()) {
 							if ($facebookAPI = $this->connect()) {
@@ -74,7 +77,7 @@
 
                 // Push "images" to Facebook
                 \Idno\Core\site()->addEventHook('post/image',function(\Idno\Core\Event $event) {
-					if (in_array('facebook', $_REQUEST['posseMethod'])) { // TODO: Use the correct input functions
+					if ((!empty($_REQUEST['posseMethod'])) && (in_array('facebook', $_REQUEST['posseMethod']))) { // TODO: Use the correct input functions
 						$object = $event->data()['object'];
 						if ($attachments = $object->getAttachments()) {
 							foreach($attachments as $attachment) {
