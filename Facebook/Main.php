@@ -26,7 +26,9 @@
                         if ($facebookAPI = $this->connect()) {
                             $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
                             $message = strip_tags($object->getDescription());
-                            $message .= "\n\n(" . $object->getShortURL(true,false) . ")";
+                            if (!substr_count($message, \Idno\Core\site()->config()->host)) {
+                                $message .= "\n\n(" . $object->getShortURL(true,false) . ")";
+                            }
                             if (!empty($message) && substr($message,0,1) != '@') {
                                 $params = array(
                                     'message' => $message
