@@ -19,8 +19,13 @@
             }
 
             function registerEventHooks() {
+
+                \Idno\Core\site()->syndication()->registerService('facebook', function() {
+                    return $this->hasFacebook();
+                }, ['note','article','image']);
+
                 // Push "notes" to Facebook
-                \Idno\Core\site()->addEventHook('post/note',function(\Idno\Core\Event $event) {
+                \Idno\Core\site()->addEventHook('post/note/facebook',function(\Idno\Core\Event $event) {
                     $object = $event->data()['object'];
                     if ($this->hasFacebook()) {
                         if ($facebookAPI = $this->connect()) {
@@ -54,7 +59,7 @@
                 });
 
                 // Push "articles" to Facebook
-                \Idno\Core\site()->addEventHook('post/article',function(\Idno\Core\Event $event) {
+                \Idno\Core\site()->addEventHook('post/article/facebook',function(\Idno\Core\Event $event) {
                     $object = $event->data()['object'];
                     if ($this->hasFacebook()) {
                         if ($facebookAPI = $this->connect()) {
@@ -73,7 +78,7 @@
                 });
 
                 // Push "images" to Facebook
-                \Idno\Core\site()->addEventHook('post/image',function(\Idno\Core\Event $event) {
+                \Idno\Core\site()->addEventHook('post/image/facebook',function(\Idno\Core\Event $event) {
                     $object = $event->data()['object'];
                     if ($attachments = $object->getAttachments()) {
                         foreach($attachments as $attachment) {
