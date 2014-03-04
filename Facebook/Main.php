@@ -134,10 +134,7 @@
              * @return bool
              */
             function hasFacebook() {
-                if (\Idno\Core\site()->session()->currentUser()->facebook) {
-                    return true;
-                }
-                return false;
+               return \Idno\Core\site()->session()->currentUser()->facebook
             }
 
         }
