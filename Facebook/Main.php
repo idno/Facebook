@@ -39,7 +39,11 @@
 
                             if (!empty($message) && substr($message,0,1) != '@') {
                                 $params = array(
-                                    'message' => $message
+                                    'message' => $message,
+                                    'actions' => array(
+                                        'name' => 'See Original',
+                                        'link' => $object->getURL()
+                                    )
                                 );
                                 if (preg_match('/(?<!=)(?<!["\'])((ht|f)tps?:\/\/[^\s\r\n\t<>"\'\(\)]+)/i',$message,$matches)) {
                                     $params['link'] = $matches[0];  // Set the first discovered link as the match
@@ -47,6 +51,7 @@
                                 try {
                                     $result = $facebookAPI->api('/me/feed', 'POST', $params);
                                     if (!empty($result['id'])) {
+                                        $result['id'] = str_replace('_','/posts/', $result['id']);
 										$object->setPosseLink('facebook','https://facebook.com/' . $result['id']);
 										$object->save();
 									}
@@ -67,10 +72,15 @@
                             $result = $facebookAPI->api('/me/feed', 'POST',
                                 array(
                                     'link' => $object->getURL(),
-                                    'message' => $object->getTitle()
+                                    'message' => $object->getTitle(),
+                                    'actions' => array(
+                                        'name' => 'See Original',
+                                        'link' => $object->getURL()
+                                    )
                                 ));
                             if (!empty($result['id'])) {
-								$object->setPosseLink('facebook','https://facebook.com/' . $response['id']);
+                                $result['id'] = str_replace('_','/posts/', $result['id']);
+								$object->setPosseLink('facebook','https://facebook.com/' . $result['id']);
 								$object->save();
 							}
                         }
@@ -94,10 +104,15 @@
                                             'post',
                                             array(
                                                 'message' => $message,
-                                                'url' => $attachment['url']
+                                                'url' => $attachment['url'],
+                                                'actions' => array(
+                                                    'name' => 'See Original',
+                                                    'link' => $object->getURL()
+                                                )
                                             )
                                         );
                                         if (!empty($response['id'])) {
+                                            $result['id'] = str_replace('_','/photos/', $response['id']);
                                         	$object->setPosseLink('facebook','https://facebook.com/' . $response['id']);
                                         	$object->save();
                                         }
