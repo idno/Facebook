@@ -96,7 +96,7 @@
                                 if ($facebookAPI = $this->connect()) {
                                     $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
                                     $message = strip_tags($object->getDescription());
-									//$message .= "\n\n" . $object->getURL();
+									$message .= "\n\nOriginal: " . $object->getURL();
                                     try {
                                         $facebookAPI->setFileUploadSupport(true);
                                         $response = $facebookAPI->api(
