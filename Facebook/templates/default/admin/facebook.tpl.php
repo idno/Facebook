@@ -18,6 +18,9 @@
                         Mark the integration method as <strong>Website with Facebook Login</strong>, and use <strong><?=\Idno\Core\site()->config()->url?></strong>
                         as the site URL.
                     </p>
+		    <p>
+			In order for your posts to be visible to others, you must take your application out of <a href="https://developers.facebook.com/docs/ApplicationSecurity/" target="_blank">developer mode</a>. You may also wish to configure a default post level in your application privacy settings.
+		    </p>
                     <p>
                         Once you've finished, fill in the details below:
                     </p>
