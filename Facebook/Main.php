@@ -30,7 +30,7 @@
                     if ($this->hasFacebook()) {
                         if ($facebookAPI = $this->connect()) {
                             $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
-                            $message = strip_tags($object->getDescription());
+                            $message = preg_replace('/<[^\>]*>/', '', $object->getDescription()); //strip_tags($object->getDescription());
 
                             // Obey the IndieWeb reference setting
                             if (!substr_count($message, \Idno\Core\site()->config()->host) && \Idno\Core\site()->config()->indieweb_reference) {
