@@ -22,7 +22,7 @@
 
                 \Idno\Core\site()->syndication()->registerService('facebook', function() {
                     return $this->hasFacebook();
-                }, ['note','article','image']);
+                }, ['note','article','image','media']);
 
                 // Push "notes" to Facebook
                 \Idno\Core\site()->addEventHook('post/note/facebook',function(\Idno\Core\Event $event) {
@@ -83,6 +83,30 @@
 								$object->setPosseLink('facebook','https://facebook.com/' . $result['id']);
 								$object->save();
 							}
+                        }
+                    }
+                });
+
+                // Push "media" to Facebook
+                \Idno\Core\site()->addEventHook('post/media/facebook',function(\Idno\Core\Event $event) {
+                    $object = $event->data()['object'];
+                    if ($this->hasFacebook()) {
+                        if ($facebookAPI = $this->connect()) {
+                            $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
+                            $result = $facebookAPI->api('/me/feed', 'POST',
+                                array(
+                                    'link' => $object->getURL(),
+                                    'message' => $object->getTitle(),
+                                    'actions' => array(
+                                        'name' => 'See Original',
+                                        'link' => $object->getURL()
+                                    )
+                                ));
+                            if (!empty($result['id'])) {
+                                $result['id'] = str_replace('_','/posts/', $result['id']);
+                                $object->setPosseLink('facebook','https://facebook.com/' . $result['id']);
+                                $object->save();
+                            }
                         }
                     }
                 });
