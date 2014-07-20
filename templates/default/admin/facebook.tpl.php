@@ -8,7 +8,7 @@
 </div>
 <div class="row">
     <div class="span10 offset1">
-        <form action="/admin/facebook/" class="form-horizontal" method="post">
+        <form action="<?=\Idno\Core\site()->config()->getURL()?>admin/facebook/" class="form-horizontal" method="post">
             <div class="control-group">
                 <div class="controls">
                     <p>
