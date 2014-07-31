@@ -16,6 +16,7 @@
                 // Add menu items to account & administration screens
                     \Idno\Core\site()->template()->extendTemplate('admin/menu/items','admin/facebook/menu');
                     \Idno\Core\site()->template()->extendTemplate('account/menu/items','account/facebook/menu');
+                    \Idno\Core\site()->template()->extendTemplate('onboarding/connect/networks','onboarding/connect/facebook');
             }
 
             function registerEventHooks() {
@@ -149,6 +150,27 @@
                         }
                     }
                 });
+            }
+
+            /**
+             * Retrieve the URL to authenticate with Facebook
+             * @return string
+             */
+            function getAuthURL()
+            {
+                $facebook = $this;
+                if (!$facebook->hasFacebook()) {
+                    if ($facebookAPI = $facebook->connect()) {
+                        $login_url = $facebookAPI->getLoginUrl(array(
+                            'scope' => 'publish_actions,publish_stream,offline_access,user_photos',
+                            'redirect_uri' => \Idno\Core\site()->config()->url . 'facebook/callback',
+                            'cancel_url' => \Idno\Core\site()->config()->url . 'account/facebook/',
+                        ));
+                    }
+                } else {
+                    $login_url = '';
+                }
+                return $login_url;
             }
 
             /**

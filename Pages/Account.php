@@ -16,17 +16,7 @@
             {
                 $this->gatekeeper(); // Logged-in users only
                 if ($facebook = \Idno\Core\site()->plugins()->get('Facebook')) {
-                    if (!$facebook->hasFacebook()) {
-                        if ($facebookAPI = $facebook->connect()) {
-                            $login_url = $facebookAPI->getLoginUrl(array(
-                                'scope' => 'publish_actions,publish_stream,offline_access,user_photos',
-                                'redirect_uri' => \Idno\Core\site()->config()->url . 'facebook/callback',
-                                'cancel_url' => \Idno\Core\site()->config()->url . 'account/facebook/',
-                            ));
-                        }
-                    } else {
-                        $login_url = '';
-                    }
+                    $login_url = $facebook->getAuthURL();
                 }
                 $t = \Idno\Core\site()->template();
                 $body = $t->__(['login_url' => $login_url])->draw('account/facebook');
