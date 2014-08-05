@@ -15,7 +15,7 @@
                         To begin using Facebook, <a href="https://developers.facebook.com/apps" target="_blank">create a new application in
                             the Facebook apps portal</a>.</p>
                     <p>
-                        Mark the integration method as <strong>Website with Facebook Login</strong>, and use <strong><?=\Idno\Core\site()->config()->url?></strong>
+                        Mark the Platform as <strong>Website</strong>, and use <strong><?=\Idno\Core\site()->config()->url?></strong>
                         as the site URL.
                     </p>
                     <p>
