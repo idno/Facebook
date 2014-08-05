@@ -16,7 +16,7 @@
                             the Facebook apps portal</a>.</p>
                     <p>
                         Mark the Platform as <strong>Website</strong>, and use <strong><?=\Idno\Core\site()->config()->url?></strong>
-                        as the site URL.
+                        as the site URL. Be sure to also include an email address. Then, click <em>Status &amp; Review</em>, and make the app public.
                     </p>
                     <p>
                         Once you've finished, fill in the details below:
