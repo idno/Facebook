@@ -57,6 +57,7 @@
 										$object->save();
 									}
                                 } catch (\Exception $e) {
+                        	    error_log('There was a problem posting to Facebook: ' . $e->getMessage());
                                     \Idno\Core\site()->session()->addMessage('There was a problem posting to Facebook: ' . $e->getMessage());
                                 }
                             }
