@@ -10,6 +10,6 @@
 
         if (!empty(\Idno\Core\site()->session()->currentUser()->facebook)) { echo 'connected'; }
 
-    ?>" >Facebook<?php if (!empty(\Idno\Core\site()->session()->currentUser()->facebook)) { echo ' - connected!'; } ?></a><br>
+    ?>" target="_top">Facebook<?php if (!empty(\Idno\Core\site()->session()->currentUser()->facebook)) { echo ' - connected!'; } ?></a><br>
     <label class="control-label">Share pictures, updates, and posts to Facebook.</label>
 </div>
