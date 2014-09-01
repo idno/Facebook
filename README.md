@@ -6,7 +6,7 @@ This plugin provides POSSE support for Known.
 Installation
 ------------
 
-* Drop the Facebook folder into the IdnoPlugins folder of your idno installation.
+* Drop the Facebook folder into the IdnoPlugins folder of your Known installation.
 * Log into Known and click on Administration.
 * Click "install" next to Facebook.
 
