@@ -26,7 +26,7 @@
 
                 \Idno\Core\site()->syndication()->registerService('facebook', function () {
                     return $this->hasFacebook();
-                }, ['note', 'article', 'image', 'media']);
+                }, ['note', 'article', 'image', 'media','rsvp']);
 
                 // Push "notes" to Facebook
                 \Idno\Core\site()->addEventHook('post/note/facebook', function (\Idno\Core\Event $event) {
@@ -68,8 +68,7 @@
                     }
                 });
 
-                // Push "articles" to Facebook
-                \Idno\Core\site()->addEventHook('post/article/facebook', function (\Idno\Core\Event $event) {
+                $article_function = function (\Idno\Core\Event $event) {
                     $object = $event->data()['object'];
                     if ($this->hasFacebook()) {
                         if ($facebookAPI = $this->connect()) {
@@ -90,7 +89,11 @@
                             }
                         }
                     }
-                });
+                };
+
+                // Push "articles" and "rsvps" to Facebook
+                \Idno\Core\site()->addEventHook('post/rsvp/facebook', $article_function);
+                \Idno\Core\site()->addEventHook('post/article/facebook', $article_function);
 
                 // Push "media" to Facebook
                 \Idno\Core\site()->addEventHook('post/media/facebook', function (\Idno\Core\Event $event) {
