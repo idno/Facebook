@@ -19,7 +19,7 @@
                         as the site URL. Be sure to also include an email address. Then, click <em>Status &amp; Review</em>, and make the app public.
                     </p>
                     <p>
-                        Once you've finished, fill in the details below:
+                        Once you've finished, fill in the details below. You can then <a href="<?=\Idno\Core\site()->config()->getURL()?>settings/facebook/">connect your Facebook account</a>.
                     </p>
                 </div>
             </div>
