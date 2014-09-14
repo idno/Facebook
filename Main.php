@@ -7,6 +7,8 @@
 
             function registerPages()
             {
+                // Deauth URL
+                \Idno\Core\site()->addPageHandler('facebook/deauth', '\IdnoPlugins\Facebook\Pages\Deauth');
                 // Register the callback URL
                 \Idno\Core\site()->addPageHandler('facebook/callback', '\IdnoPlugins\Facebook\Pages\Callback');
                 // Register admin settings

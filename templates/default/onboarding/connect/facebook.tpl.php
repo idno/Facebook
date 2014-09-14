@@ -1,7 +1,11 @@
 <?php
 
     if ($facebook = \Idno\Core\site()->plugins()->get('Facebook')) {
-        $login_url = $facebook->getAuthURL();
+        if (empty(\Idno\Core\site()->session()->currentUser()->facebook)) {
+            $login_url = $facebook->getAuthURL();
+        } else {
+            $login_url = \Idno\Core\site()->config()->getURL() . 'facebook/deauth';
+        }
     }
 
 ?>
