@@ -174,11 +174,12 @@
                         'redirect_uri' => \Idno\Core\site()->config()->url . 'facebook/callback',
                         'cancel_url'   => \Idno\Core\site()->config()->url . 'account/facebook/',
                     ));
+                    return $login_url;
                 }
                 //} else {
                 //    $login_url = '';
                 //}
-                return $login_url;
+                return '';
             }
 
             /**
