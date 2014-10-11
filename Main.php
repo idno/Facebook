@@ -28,7 +28,7 @@
 
                 \Idno\Core\site()->syndication()->registerService('facebook', function () {
                     return $this->hasFacebook();
-                }, ['note', 'article', 'image', 'media','rsvp']);
+                }, array('note', 'article', 'image', 'media','rsvp'));
 
                 // Push "notes" to Facebook
                 \Idno\Core\site()->addEventHook('post/note/facebook', function (\Idno\Core\Event $event) {
