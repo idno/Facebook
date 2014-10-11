@@ -190,11 +190,11 @@
             {
                 if (!empty(\Idno\Core\site()->config()->facebook)) {
                     require_once(dirname(__FILE__) . '/external/facebook-php-sdk/src/facebook.php');
-                    $facebook = new \Facebook([
+                    $facebook = new \Facebook(array(
                         'appId'  => \Idno\Core\site()->config()->facebook['appId'],
                         'secret' => \Idno\Core\site()->config()->facebook['secret'],
                         'cookie' => true
-                    ]);
+                    ));
 
                     return $facebook;
                 }

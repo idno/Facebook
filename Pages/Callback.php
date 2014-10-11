@@ -20,7 +20,7 @@
                         if ($fb_user = $facebookAPI->getUser()) {
                             $access_token = $facebookAPI->getAccessToken();
                             $user = \Idno\Core\site()->session()->currentUser();
-                            $user->facebook = ['access_token' => $access_token];
+                            $user->facebook = array('access_token' => $access_token);
                             $user->save();
                             \Idno\Core\site()->session()->addMessage('Your Facebook account was connected.');
                         }
