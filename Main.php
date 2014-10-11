@@ -32,7 +32,8 @@
 
                 // Push "notes" to Facebook
                 \Idno\Core\site()->addEventHook('post/note/facebook', function (\Idno\Core\Event $event) {
-                    $object = $event->data()['object'];
+                    $eventdata = $event->data();
+                    $object = $eventdata['object'];
                     if ($this->hasFacebook()) {
                         if ($facebookAPI = $this->connect()) {
                             $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
@@ -71,7 +72,8 @@
                 });
 
                 $article_function = function (\Idno\Core\Event $event) {
-                    $object = $event->data()['object'];
+                    $eventdata = $event->data();
+                    $object = $eventdata['object'];
                     if ($this->hasFacebook()) {
                         if ($facebookAPI = $this->connect()) {
                             $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
@@ -99,7 +101,8 @@
 
                 // Push "media" to Facebook
                 \Idno\Core\site()->addEventHook('post/media/facebook', function (\Idno\Core\Event $event) {
-                    $object = $event->data()['object'];
+                    $eventdata = $event->data();
+                    $object = $eventdata['object'];
                     if ($this->hasFacebook()) {
                         if ($facebookAPI = $this->connect()) {
                             $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
@@ -123,7 +126,8 @@
 
                 // Push "images" to Facebook
                 \Idno\Core\site()->addEventHook('post/image/facebook', function (\Idno\Core\Event $event) {
-                    $object = $event->data()['object'];
+                    $eventdata = $event->data();
+                    $object = $eventdata['object'];
                     if ($attachments = $object->getAttachments()) {
                         foreach ($attachments as $attachment) {
                             if ($this->hasFacebook()) {
