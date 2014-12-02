@@ -47,10 +47,8 @@
                             if (!empty($message) && substr($message, 0, 1) != '@') {
                                 $params = array(
                                     'message' => $message,
-                                    'actions' => array(
-                                        'name' => 'See Original',
-                                        'link' => $object->getURL()
-                                    )
+                                    'actionName' => 'See Original',
+                                    'actionLink' => $object->getURL()
                                 );
                                 if (preg_match('/(?<!=)(?<!["\'])((ht|f)tps?:\/\/[^\s\r\n\t<>"\'\(\)]+)/i', $message, $matches)) {
                                     $params['link'] = $matches[0]; // Set the first discovered link as the match
@@ -81,10 +79,8 @@
                                 array(
                                     'link'    => $object->getURL(),
                                     'message' => $object->getTitle(),
-                                    'actions' => array(
-                                        'name' => 'See Original',
-                                        'link' => $object->getURL()
-                                    )
+                                    'actionName' => 'See Original',
+                                    'actionLink' => $object->getURL()
                                 ));
                             if (!empty($result['id'])) {
                                 $result['id'] = str_replace('_', '/posts/', $result['id']);
@@ -110,10 +106,8 @@
                                 array(
                                     'link'    => $object->getURL(),
                                     'message' => $object->getTitle(),
-                                    'actions' => array(
-                                        'name' => 'See Original',
-                                        'link' => $object->getURL()
-                                    )
+                                    'actionName' => 'See Original',
+                                    'actionLink' => $object->getURL()
                                 ));
                             if (!empty($result['id'])) {
                                 $result['id'] = str_replace('_', '/posts/', $result['id']);
@@ -143,10 +137,8 @@
                                             array(
                                                 'message' => $message,
                                                 'url'     => $attachment['url'],
-                                                'actions' => array(
-                                                    'name' => 'See Original',
-                                                    'link' => $object->getURL()
-                                                )
+                                                'actionName' => 'See Original',
+                                                'actionLink' => $object->getURL()
                                             )
                                         );
                                         if (!empty($response['id'])) {
@@ -171,36 +163,27 @@
             function getAuthURL()
             {
                 $facebook = $this;
-                //if (!$facebook->hasFacebook()) {
                 if ($facebookAPI = $facebook->connect()) {
-                    $login_url = $facebookAPI->getLoginUrl(array(
-                        'scope'        => 'publish_actions,publish_stream,offline_access',
-                        'redirect_uri' => \Idno\Core\site()->config()->url . 'facebook/callback',
-                        'cancel_url'   => \Idno\Core\site()->config()->url . 'account/facebook/',
-                    ));
-                    return $login_url;
+                    return $facebookAPI->getLoginUrl();
                 }
-                //} else {
-                //    $login_url = '';
-                //}
                 return '';
             }
 
             /**
              * Connect to Facebook
-             * @return bool|\Facebook
+             * @return bool|FacebookAPI
              */
             function connect()
             {
                 if (!empty(\Idno\Core\site()->config()->facebook)) {
-                    require_once(dirname(__FILE__) . '/external/facebook-php-sdk/src/facebook.php');
-                    $facebook = new \Facebook(array(
-                        'appId'  => \Idno\Core\site()->config()->facebook['appId'],
-                        'secret' => \Idno\Core\site()->config()->facebook['secret'],
-                        'cookie' => true
-                    ));
 
-                    return $facebook;
+                    require_once(dirname(__FILE__) . '/external/facebook-sdk/autoload.php');
+                    \Facebook\FacebookSession::setDefaultApplication(
+                        \Idno\Core\site()->config()->facebook['appId'],
+                        \Idno\Core\site()->config()->facebook['secret']
+                    );
+
+                    return new FacebookAPI();
                 }
 
                 return false;
