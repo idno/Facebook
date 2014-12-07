@@ -28,10 +28,9 @@
 
                 \Idno\Core\site()->syndication()->registerService('facebook', function () {
                     return $this->hasFacebook();
-                }, array('note', 'article', 'image', 'media','rsvp'));
+                }, array('note', 'article', 'image', 'media','rsvp', 'bookmark'));
 
-                // Push "notes" to Facebook
-                \Idno\Core\site()->addEventHook('post/note/facebook', function (\Idno\Core\Event $event) {
+                $notes_function = function (\Idno\Core\Event $event) {
                     $eventdata = $event->data();
                     $object = $eventdata['object'];
                     if ($this->hasFacebook()) {
@@ -47,8 +46,7 @@
                             if (!empty($message) && substr($message, 0, 1) != '@') {
                                 $params = array(
                                     'message' => $message,
-                                    'actionName' => 'See Original',
-                                    'actionLink' => $object->getURL()
+                                    'actions' => json_encode([['name' => 'See Original', 'link' => $object->getURL()]]),
                                 );
                                 if (preg_match('/(?<!=)(?<!["\'])((ht|f)tps?:\/\/[^\s\r\n\t<>"\'\(\)]+)/i', $message, $matches)) {
                                     $params['link'] = $matches[0]; // Set the first discovered link as the match
@@ -62,12 +60,16 @@
                                     }
                                 } catch (\Exception $e) {
                                     error_log('There was a problem posting to Facebook: ' . $e->getMessage());
-                                    \Idno\Core\site()->session()->addErrorMessage('There was a problem posting to Facebook: ' . $e->getMessage());
+                                    \Idno\Core\site()->session()->addMessage('There was a problem posting to Facebook: ' . $e->getMessage());
                                 }
                             }
                         }
                     }
-                });
+                };
+
+                // Push "notes" to Facebook
+                \Idno\Core\site()->addEventHook('post/note/facebook', $notes_function);
+                \Idno\Core\site()->addEventHook('post/bookmark/facebook', $notes_function);
 
                 $article_function = function (\Idno\Core\Event $event) {
                     $eventdata = $event->data();
@@ -79,8 +81,7 @@
                                 array(
                                     'link'    => $object->getURL(),
                                     'message' => $object->getTitle(),
-                                    'actionName' => 'See Original',
-                                    'actionLink' => $object->getURL()
+                                    'actions' => json_encode([['name' => 'See Original', 'link' => $object->getURL()]]),
                                 ));
                             if (!empty($result['id'])) {
                                 $result['id'] = str_replace('_', '/posts/', $result['id']);
@@ -106,8 +107,7 @@
                                 array(
                                     'link'    => $object->getURL(),
                                     'message' => $object->getTitle(),
-                                    'actionName' => 'See Original',
-                                    'actionLink' => $object->getURL()
+                                    'actions' => json_encode([['name' => 'See Original', 'link' => $object->getURL()]]),
                                 ));
                             if (!empty($result['id'])) {
                                 $result['id'] = str_replace('_', '/posts/', $result['id']);
@@ -137,8 +137,7 @@
                                             array(
                                                 'message' => $message,
                                                 'url'     => $attachment['url'],
-                                                'actionName' => 'See Original',
-                                                'actionLink' => $object->getURL()
+                                                'actions' => json_encode([['name' => 'See Original', 'link' => $object->getURL()]]),
                                             )
                                         );
                                         if (!empty($response['id'])) {
