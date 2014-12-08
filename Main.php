@@ -130,7 +130,7 @@
                                     $message = strip_tags($object->getTitle()) . "\n\n" . strip_tags($object->getDescription());
                                     $message .= "\n\nOriginal: " . $object->getURL();
                                     try {
-                                        $facebookAPI->setFileUploadSupport(true);
+                                        //$facebookAPI->setFileUploadSupport(true);
                                         $response = $facebookAPI->api(
                                             '/me/photos/',
                                             'post',
