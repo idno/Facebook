@@ -1,8 +1,9 @@
 <div class="row">
 
     <div class="span10 offset1">
+	            <?=$this->draw('account/menu')?>
         <h1>Facebook</h1>
-        <?=$this->draw('account/menu')?>
+
     </div>
 
 </div>
