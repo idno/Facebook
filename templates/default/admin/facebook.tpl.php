@@ -2,7 +2,7 @@
 
     <div class="span10 offset1">
 	            <?=$this->draw('admin/menu')?>
-        <h1>Facebook</h1>
+        <h1>Facebook configuration</h1>
 
     </div>
 
@@ -11,7 +11,7 @@
     <div class="span10 offset1">
         <form action="<?=\Idno\Core\site()->config()->getURL()?>admin/facebook/" class="form-horizontal" method="post">
             <div class="control-group">
-                <div class="controls">
+                <div class="controls-config">
                     <p>
                         To begin using Facebook, <a href="https://developers.facebook.com/apps" target="_blank">create a new application in
                             the Facebook apps portal</a>.</p>
@@ -36,9 +36,17 @@
                     <input type="text" id="name" placeholder="App secret" class="span4" name="secret" value="<?=htmlspecialchars(\Idno\Core\site()->config()->facebook['secret'])?>" >
                 </div>
             </div>
+            
+                        
+                      <div class="control-group">
+	          <p>
+                        After the Facebook application is configured, you must enable it under Plugins.
+                    </p>
+
+          </div> 
             <div class="control-group">
-                <div class="controls">
-                    <button type="submit" class="btn btn-primary">Save</button>
+                <div class="controls-save">
+                    <button type="submit" class="btn btn-primary">Save settings</button>
                 </div>
             </div>
             <?= \Idno\Core\site()->actions()->signForm('/admin/facebook/')?>
