@@ -1,7 +1,7 @@
 <div class="row">
 
     <div class="span10 offset1">
-	            <?=$this->draw('account/menu')?>
+        <?=$this->draw('account/menu')?>
         <h1>Facebook</h1>
 
     </div>
@@ -14,14 +14,22 @@
                 if (empty(\Idno\Core\site()->session()->currentUser()->facebook)) {
             ?>
                     <div class="control-group">
-                        <div class="controls">
-                            <p>
-                                If you have a Facebook account, you may connect it here. Public content that you
-                                post to this site will be automatically cross-posted to your Facebook wall.
+                        <div class="controls-config">
+	                       <div class="row">
+						   		<div class="span6">
+                              <p>
+                                Easily share pictures, updates, and posts to Facebook.</p>  
+                                
+                                <p>
+                                With Facebook connected, you can cross-post content that you publish publicly on your site. 
                             </p>
+						   		</div>
+	                       </div>
+	                       	                       <div class="social span4">
                             <p>
-                                <a href="<?=$vars['login_url']?>" class="btn btn-large btn-success">Click here to connect Facebook to your account</a>
+                                <a href="<?=$vars['login_url']?>" class="connect fb">Connect Facebook</a>
                             </p>
+	                       	                       </div>
                         </div>
                     </div>
                 <?php
@@ -30,14 +38,18 @@
 
                     ?>
                     <div class="control-group">
-                        <div class="controls">
+                        <div class="controls-config">
+	                        	                       <div class="row">
+						    <div class="span6">
                             <p>
-                                Your account is currently connected to Facebook. Public content that you post here
-                                will be shared with your Facebook account.
+                                Your account is currently connected to Facebook. Public content that you publish here
+                               can be cross-posted to your Facebook account.
                             </p>
+						    </div>
+	                        	                       </div>
                             <p>
                                 <input type="hidden" name="remove" value="1" />
-                                <button type="submit" class="btn btn-primary">Click here to remove Facebook from your account.</button>
+                                <button type="submit" class="btn btn-primary">Disconnect Facebook</button>
                             </p>
                         </div>
                     </div>
