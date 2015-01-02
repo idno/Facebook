@@ -63,7 +63,7 @@
              * @param $params
              * @return array|bool
              */
-            function api($endpoint, $verb, $params) {
+            function api($endpoint, $verb, $params = null) {
 
                 if (empty($this->session)) {
                     return false;
@@ -73,6 +73,7 @@
                     $result = array('id' => $response->getProperty('id'), 'response' => $response);
                     return $result;
                 } catch (\Exception $e) {
+                    \Idno\Core\site()->session()->addMessage($e->getMessage());
                     return false;
                 }
 

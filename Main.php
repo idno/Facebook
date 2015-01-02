@@ -30,12 +30,25 @@
                     return $this->hasFacebook();
                 }, array('note', 'article', 'image', 'media','rsvp', 'bookmark'));
 
+                if ($this->hasFacebook()) {
+                    if (is_array(\Idno\Core\site()->session()->currentUser()->facebook) && !array_key_exists('access_token', \Idno\Core\site()->session()->currentUser()->facebook)) {
+                        foreach(\Idno\Core\site()->session()->currentUser()->facebook as $username => $details) {
+                            \Idno\Core\site()->syndication()->registerServiceAccount('facebook', $username, $details['name']);
+                        }
+                    }
+                }
+
                 $notes_function = function (\Idno\Core\Event $event) {
                     $eventdata = $event->data();
                     $object = $eventdata['object'];
                     if ($this->hasFacebook()) {
-                        if ($facebookAPI = $this->connect()) {
-                            $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
+                        $object      = $eventdata['object'];
+                        if (!empty($eventdata['syndication_account'])) {
+                            $facebookAPI  = $this->connect($eventdata['syndication_account']);
+                        } else {
+                            $facebookAPI  = $this->connect();
+                        }
+                        if (!empty($facebookAPI)) {
                             $message = preg_replace('/<[^\>]*>/', '', $object->getDescription()); //strip_tags($object->getDescription());
 
                             // Obey the IndieWeb reference setting
@@ -75,8 +88,12 @@
                     $eventdata = $event->data();
                     $object = $eventdata['object'];
                     if ($this->hasFacebook()) {
-                        if ($facebookAPI = $this->connect()) {
-                            $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
+                        if (!empty($eventdata['syndication_account'])) {
+                            $facebookAPI  = $this->connect($eventdata['syndication_account']);
+                        } else {
+                            $facebookAPI  = $this->connect();
+                        }
+                        if (!empty($facebookAPI)) {
                             $result = $facebookAPI->api('/me/feed', 'POST',
                                 array(
                                     'link'    => $object->getURL(),
@@ -101,8 +118,12 @@
                     $eventdata = $event->data();
                     $object = $eventdata['object'];
                     if ($this->hasFacebook()) {
-                        if ($facebookAPI = $this->connect()) {
-                            $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
+                        if (!empty($eventdata['syndication_account'])) {
+                            $facebookAPI  = $this->connect($eventdata['syndication_account']);
+                        } else {
+                            $facebookAPI  = $this->connect();
+                        }
+                        if (!empty($facebookAPI)) {
                             $result = $facebookAPI->api('/me/feed', 'POST',
                                 array(
                                     'link'    => $object->getURL(),
@@ -125,8 +146,12 @@
                     if ($attachments = $object->getAttachments()) {
                         foreach ($attachments as $attachment) {
                             if ($this->hasFacebook()) {
-                                if ($facebookAPI = $this->connect()) {
-                                    $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
+                                if (!empty($eventdata['syndication_account'])) {
+                                    $facebookAPI  = $this->connect($eventdata['syndication_account']);
+                                } else {
+                                    $facebookAPI  = $this->connect();
+                                }
+                                if (!empty($facebookAPI)) {
                                     $message = strip_tags($object->getTitle()) . "\n\n" . strip_tags($object->getDescription());
                                     $message .= "\n\nOriginal: " . $object->getURL();
                                     try {
@@ -172,7 +197,7 @@
              * Connect to Facebook
              * @return bool|FacebookAPI
              */
-            function connect()
+            function connect($account_id = '')
             {
                 if (!empty(\Idno\Core\site()->config()->facebook)) {
 
@@ -182,7 +207,19 @@
                         \Idno\Core\site()->config()->facebook['secret']
                     );
 
-                    return new FacebookAPI();
+                    $facebookAPI = new FacebookAPI();
+                    if (!empty($account_id)) {
+                        if (!empty(\Idno\Core\site()->session()->currentUser()->facebook[$account_id])) {
+                            $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook[$account_id]['access_token']);
+                            return $facebookAPI;
+                        }
+                    } else {
+                        if (!empty(\Idno\Core\site()->session()->currentUser()->facebook['access_token'])) {
+                            $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
+                        }
+                        return $facebookAPI;    // This needs to return even if we haven't set the user token yet, for the auth callback
+                    }
+
                 }
 
                 return false;
@@ -194,6 +231,9 @@
              */
             function hasFacebook()
             {
+                if (!\Idno\Core\site()->session()->currentUser()) {
+                    return false;
+                }
                 return \Idno\Core\site()->session()->currentUser()->facebook;
             }
 
