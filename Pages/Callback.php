@@ -27,6 +27,25 @@
                                 $id = $person['response']->getProperty('id');
                                 $user->facebook[$id] = ['access_token' => $access_token, 'name' => $name];
                                 \Idno\Core\site()->syndication()->registerServiceAccount('facebook', $id, $name);
+                                if (\Idno\Core\site()->config()->multipleSyndicationAccounts()) {
+                                    if ($companies = $facebookAPI->api('/me/accounts','GET')) {
+                                        if (!empty($companies['response'])) {
+                                            foreach($companies['response']->asArray() as $company_container) {
+                                                foreach($company_container as $company) {
+                                                    $company = (array) $company;
+                                                    if ($perms = $company['perms']) {
+                                                        if (in_array('CREATE_CONTENT', $perms) && !empty($company['name'])) {
+                                                            $id = $company['id'];
+                                                            $name = $company['name'];
+                                                            $user->facebook[$id] = ['access_token' => $access_token, 'name' => $name, 'page' => true];
+                                                            \Idno\Core\site()->syndication()->registerServiceAccount('facebook', $id, $name);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             } else {
                                 $user->facebook = array('access_token' => $access_token);
                             }

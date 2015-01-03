@@ -5,6 +5,8 @@
         class Main extends \Idno\Common\Plugin
         {
 
+            public $endpoint = 'me';
+
             function registerPages()
             {
                 // Deauth URL
@@ -65,7 +67,7 @@
                                     $params['link'] = $matches[0]; // Set the first discovered link as the match
                                 }
                                 try {
-                                    $result = $facebookAPI->api('/me/feed', 'POST', $params);
+                                    $result = $facebookAPI->api('/'.$this->endpoint.'/feed', 'POST', $params);
                                     if (!empty($result['id'])) {
                                         $result['id'] = str_replace('_', '/posts/', $result['id']);
                                         $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id']);
@@ -94,7 +96,7 @@
                             $facebookAPI  = $this->connect();
                         }
                         if (!empty($facebookAPI)) {
-                            $result = $facebookAPI->api('/me/feed', 'POST',
+                            $result = $facebookAPI->api('/'.$this->endpoint.'/feed', 'POST',
                                 array(
                                     'link'    => $object->getURL(),
                                     'message' => $object->getTitle(),
@@ -124,7 +126,7 @@
                             $facebookAPI  = $this->connect();
                         }
                         if (!empty($facebookAPI)) {
-                            $result = $facebookAPI->api('/me/feed', 'POST',
+                            $result = $facebookAPI->api('/'.$this->endpoint.'/feed', 'POST',
                                 array(
                                     'link'    => $object->getURL(),
                                     'message' => $object->getTitle(),
@@ -157,7 +159,7 @@
                                     try {
                                         //$facebookAPI->setFileUploadSupport(true);
                                         $response = $facebookAPI->api(
-                                            '/me/photos/',
+                                            '/'.$this->endpoint.'/photos/',
                                             'post',
                                             array(
                                                 'message' => $message,
@@ -211,6 +213,7 @@
                     if (!empty($account_id)) {
                         if (!empty(\Idno\Core\site()->session()->currentUser()->facebook[$account_id])) {
                             $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook[$account_id]['access_token']);
+                            $this->endpoint = $account_id;
                             return $facebookAPI;
                         }
                     } else {
