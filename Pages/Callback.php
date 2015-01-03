@@ -37,6 +37,7 @@
                                                         if (in_array('CREATE_CONTENT', $perms) && !empty($company['name'])) {
                                                             $id = $company['id'];
                                                             $name = $company['name'];
+                                                            $access_token = $company['access_token'];
                                                             $user->facebook[$id] = ['access_token' => $access_token, 'name' => $name, 'page' => true];
                                                             \Idno\Core\site()->syndication()->registerServiceAccount('facebook', $id, $name);
                                                         }
