@@ -25,7 +25,7 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="social span4">
+                        <div class="social span6">
                             <p>
                                 <a href="<?= $vars['login_url'] ?>" class="connect fb">Connect Facebook</a>
                             </p>
@@ -42,12 +42,12 @@
                         <div class="row">
                             <div class="span6">
                                 <p>
-                                    Your account is currently connected to Facebook. Public content that you publish
-                                    here
-                                    can be cross-posted to your Facebook account.
+                                    Your account is currently connected to Facebook. 
+                                    Public updates, pictures, and posts that you publish
+                                    here can be cross-posted to Facebook.
+ 
                                 </p>
-                            </div>
-                        </div>
+
                         <?php
 
                             if ($accounts = \Idno\Core\site()->syndication()->getServiceAccounts('facebook')) {
@@ -55,6 +55,7 @@
                                 foreach ($accounts as $id => $account) {
 
                                     ?>
+                                <div class="social">
                                     <form action="<?= \Idno\Core\site()->config()->getDisplayURL() ?>facebook/deauth"
                                           class="form-horizontal" method="post">
                                         <p>
@@ -72,6 +73,8 @@
                             } else {
 
                                 ?>
+                                </div>
+
                                 <div class="social">
                                     <form action="<?= \Idno\Core\site()->config()->getDisplayURL() ?>facebook/deauth"
                                           class="form-horizontal" method="post">
@@ -82,20 +85,23 @@
                                             <?= \Idno\Core\site()->actions()->signForm('/account/facebook/') ?>
                                         </p>
                                     </form>
-                                </div>
+
                             <?php
 
                             }
 
                         ?>
+                    			</div>
+
+								<p>
+								<a href="<?= $vars['login_url'] ?>" ><icon class="icon-plus"></icon> Add another Facebook account</a>
+                    			</p>
+                    		</div>
+                </div>
+               
+
                     </div>
                 </div>
-                <div class="social span4">
-                    <p>
-                        <a href="<?= $vars['login_url'] ?>" >Connect another Facebook account</a>
-                    </p>
-                </div>
-
             <?php
 
             }
