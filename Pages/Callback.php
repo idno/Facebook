@@ -25,7 +25,7 @@
                             if ($person = $facebookAPI->api('/me','GET')) {
                                 $name = $person['response']->getProperty('name');
                                 $id = $person['response']->getProperty('id');
-                                $user->facebook[$id] = ['access_token' => $access_token, 'name' => $name];
+                                $user->facebook[$id] = ['id' => $id, 'access_token' => $access_token, 'name' => $name];
                                 \Idno\Core\site()->syndication()->registerServiceAccount('facebook', $id, $name);
                                 if (\Idno\Core\site()->config()->multipleSyndicationAccounts()) {
                                     if ($companies = $facebookAPI->api('/me/accounts','GET')) {
@@ -38,7 +38,7 @@
                                                             $id = $company['id'];
                                                             $name = $company['name'];
                                                             $access_token = $company['access_token'];
-                                                            $user->facebook[$id] = ['access_token' => $access_token, 'name' => $name, 'page' => true];
+                                                            $user->facebook[$id] = ['id' => $id, 'access_token' => $access_token, 'name' => $name, 'page' => true];
                                                             \Idno\Core\site()->syndication()->registerServiceAccount('facebook', $id, $name);
                                                         }
                                                     }
@@ -51,7 +51,6 @@
                                 $user->facebook = array('access_token' => $access_token);
                             }
                             $user->save();
-                            \Idno\Core\site()->session()->addMessage('Your Facebook account was connected.');
                         }
                     }
                 }
