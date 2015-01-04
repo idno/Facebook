@@ -31,7 +31,7 @@
                     $user->save();
                     \Idno\Core\site()->session()->addMessage('Your Facebook settings have been removed from your account.');
                 }
-                $this->forward('/account/facebook/');
+                $this->forward(\Idno\Core\site()->config()->getDisplayURL() . 'account/facebook/');
             }
 
         }

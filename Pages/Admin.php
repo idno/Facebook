@@ -30,7 +30,7 @@
                 );
                 \Idno\Core\site()->config()->save();
                 \Idno\Core\site()->session()->addMessage('Your Facebook application details were saved.');
-                $this->forward('/admin/facebook/');
+                $this->forward(\Idno\Core\site()->config()->getDisplayURL() . 'admin/facebook/');
             }
 
         }
