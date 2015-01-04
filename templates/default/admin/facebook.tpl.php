@@ -27,13 +27,13 @@
             <div class="control-group">
                 <label class="control-label" for="name">App ID</label>
                 <div class="controls">
-                    <input type="text" id="name" placeholder="App ID" class="span4" name="appId" value="<?=htmlspecialchars(\Idno\Core\site()->config()->facebook['appId'])?>" >
+                    <input type="text" id="name" placeholder="App ID" class="span6" name="appId" value="<?=htmlspecialchars(\Idno\Core\site()->config()->facebook['appId'])?>" >
                 </div>
             </div>
             <div class="control-group">
                 <label class="control-label" for="name">App secret</label>
                 <div class="controls">
-                    <input type="text" id="name" placeholder="App secret" class="span4" name="secret" value="<?=htmlspecialchars(\Idno\Core\site()->config()->facebook['secret'])?>" >
+                    <input type="text" id="name" placeholder="App secret" class="span6" name="secret" value="<?=htmlspecialchars(\Idno\Core\site()->config()->facebook['secret'])?>" >
                 </div>
             </div>
             
