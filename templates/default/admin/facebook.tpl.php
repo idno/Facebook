@@ -40,7 +40,7 @@
                         
                       <div class="control-group">
 	          <p>
-                        After the Facebook application is configured, you must enable it under Plugins.
+                        After the Facebook application is configured, you must connect under account Settings.
                     </p>
 
           </div> 
