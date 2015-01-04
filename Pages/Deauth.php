@@ -14,11 +14,16 @@
                 $this->gatekeeper(); // Logged-in users only
                 if ($twitter = \Idno\Core\site()->plugins()->get('Facebook')) {
                     if ($user = \Idno\Core\site()->session()->currentUser()) {
-                        $user->facebook = false;
+                        if ($account = $this->getInput('remove')) {
+                            if (array_key_exists($account, $user->facebook)) {
+                                unset($user->facebook[$account]);
+                            } else {
+                                $user->facebook = false;
+                            }
+                        }
                         $user->save();
                         \Idno\Core\site()->session()->refreshSessionUser($user);
                         if (!empty($user->link_callback)) {
-                            error_log($user->link_callback);
                             $this->forward($user->link_callback); exit;
                         }
                     }
