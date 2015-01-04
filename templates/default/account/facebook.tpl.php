@@ -53,11 +53,11 @@
 
                                 if ($accounts = \Idno\Core\site()->syndication()->getServiceAccounts('facebook')) {
 
-                                    foreach ($accounts as $account) {
+                                    foreach ($accounts as $id => $account) {
 
                                         ?>
                                         <p>
-                                            <input type="hidden" name="remove" value="<?= $account['id'] ?>"/>
+                                            <input type="hidden" name="remove" value="<?= $id ?>"/>
                                             <button type="submit"
                                                     class="connect fb connected"><?= $account['name'] ?></button>
                                         </p>
