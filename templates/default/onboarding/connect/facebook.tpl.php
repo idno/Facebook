@@ -4,7 +4,7 @@
         if (empty(\Idno\Core\site()->session()->currentUser()->facebook)) {
             $login_url = $facebook->getAuthURL();
         } else {
-            $login_url = \Idno\Core\site()->config()->getURL() . 'facebook/deauth';
+            $login_url = \Idno\Core\site()->config()->getDisplayURL() . 'facebook/deauth';
         }
     }
 

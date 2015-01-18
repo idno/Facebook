@@ -9,7 +9,7 @@
 </div>
 <div class="row">
     <div class="span10 offset1">
-        <form action="<?=\Idno\Core\site()->config()->getURL()?>admin/facebook/" class="form-horizontal" method="post">
+        <form action="<?=\Idno\Core\site()->config()->getDisplayURL()?>admin/facebook/" class="form-horizontal" method="post">
             <div class="control-group">
                 <div class="controls-config">
                     <p>
@@ -20,7 +20,7 @@
                         as the site URL. Be sure to also include an email address. Then, click <em>Status &amp; Review</em>, and make the app public.
                     </p>
                     <p>
-                        Once you've finished, fill in the details below. You can then <a href="<?=\Idno\Core\site()->config()->getURL()?>account/facebook/">connect your Facebook account</a>.
+                        Once you've finished, fill in the details below. You can then <a href="<?=\Idno\Core\site()->config()->getDisplayURL()?>account/facebook/">connect your Facebook account</a>.
                     </p>
                 </div>
             </div>
