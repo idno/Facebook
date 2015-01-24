@@ -20,6 +20,8 @@
                             } else {
                                 $user->facebook = false;
                             }
+                        } else {
+                            $user->facebook = false;
                         }
                         $user->save();
                         \Idno\Core\site()->session()->refreshSessionUser($user);
