@@ -55,7 +55,7 @@
                                 foreach ($accounts as $id => $account) {
 
                                     ?>
-                                <div class="social span6">
+                                <div class="social">
                                     <form action="<?= \Idno\Core\site()->config()->getDisplayURL() ?>facebook/deauth"
                                           class="form-horizontal" method="post">
                                         <p>
@@ -65,8 +65,7 @@
                                             </button>
                                             <?= \Idno\Core\site()->actions()->signForm('/account/facebook/') ?>
                                         </p>
-                                    </form> 
-                                    </div>
+                                    </form>
                                 <?php
 
                                 }
@@ -74,9 +73,9 @@
                             } else {
 
                                 ?>
-                               
+                                </div>
 
-                                <div class="social span6">
+                                <div class="social">
                                     <form action="<?= \Idno\Core\site()->config()->getDisplayURL() ?>facebook/deauth"
                                           class="form-horizontal" method="post">
                                         <p>
@@ -86,14 +85,13 @@
                                             <?= \Idno\Core\site()->actions()->signForm('/account/facebook/') ?>
                                         </p>
                                     </form>
-                                    </div>
 
                             <?php
 
                             }
 
                         ?>
-                    			
+                    			</div>
 
 								<p>
 								<a href="<?= $vars['login_url'] ?>" ><icon class="icon-plus"></icon> Add another Facebook account</a>

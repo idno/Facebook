@@ -47,8 +47,14 @@
                         $object      = $eventdata['object'];
                         if (!empty($eventdata['syndication_account'])) {
                             $facebookAPI  = $this->connect($eventdata['syndication_account']);
+                            if (!empty(\Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']])) {
+                                $name = \Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']]['name'];
+                            }
                         } else {
                             $facebookAPI  = $this->connect();
+                        }
+                        if (empty($name)) {
+                            $name = 'Facebook';
                         }
                         if (!empty($facebookAPI)) {
                             $message = preg_replace('/<[^\>]*>/', '', $object->getDescription()); //strip_tags($object->getDescription());
@@ -70,7 +76,7 @@
                                     $result = $facebookAPI->api('/'.$this->endpoint.'/feed', 'POST', $params);
                                     if (!empty($result['id'])) {
                                         $result['id'] = str_replace('_', '/posts/', $result['id']);
-                                        $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id']);
+                                        $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id'], $name);
                                         $object->save();
                                     }
                                 } catch (\Exception $e) {
@@ -92,8 +98,14 @@
                     if ($this->hasFacebook()) {
                         if (!empty($eventdata['syndication_account'])) {
                             $facebookAPI  = $this->connect($eventdata['syndication_account']);
+                            if (!empty(\Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']])) {
+                                $name = \Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']]['name'];
+                            }
                         } else {
                             $facebookAPI  = $this->connect();
+                        }
+                        if (empty($name)) {
+                            $name = 'Facebook';
                         }
                         if (!empty($facebookAPI)) {
                             $result = $facebookAPI->api('/'.$this->endpoint.'/feed', 'POST',
@@ -104,7 +116,7 @@
                                 ));
                             if (!empty($result['id'])) {
                                 $result['id'] = str_replace('_', '/posts/', $result['id']);
-                                $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id']);
+                                $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id'], $name);
                                 $object->save();
                             }
                         }
@@ -122,8 +134,14 @@
                     if ($this->hasFacebook()) {
                         if (!empty($eventdata['syndication_account'])) {
                             $facebookAPI  = $this->connect($eventdata['syndication_account']);
+                            if (!empty(\Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']])) {
+                                $name = \Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']]['name'];
+                            }
                         } else {
                             $facebookAPI  = $this->connect();
+                        }
+                        if (empty($name)) {
+                            $name = 'Facebook';
                         }
                         if (!empty($facebookAPI)) {
                             $result = $facebookAPI->api('/'.$this->endpoint.'/feed', 'POST',
@@ -134,7 +152,7 @@
                                 ));
                             if (!empty($result['id'])) {
                                 $result['id'] = str_replace('_', '/posts/', $result['id']);
-                                $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id']);
+                                $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id'], $name);
                                 $object->save();
                             }
                         }
@@ -150,8 +168,14 @@
                             if ($this->hasFacebook()) {
                                 if (!empty($eventdata['syndication_account'])) {
                                     $facebookAPI  = $this->connect($eventdata['syndication_account']);
+                                    if (!empty(\Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']])) {
+                                        $name = \Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']]['name'];
+                                    }
                                 } else {
                                     $facebookAPI  = $this->connect();
+                                }
+                                if (empty($name)) {
+                                    $name = 'Facebook';
                                 }
                                 if (!empty($facebookAPI)) {
                                     $message = strip_tags($object->getTitle()) . "\n\n" . strip_tags($object->getDescription());
@@ -169,7 +193,7 @@
                                         );
                                         if (!empty($response['id'])) {
                                             $result['id'] = str_replace('_', '/photos/', $response['id']);
-                                            $object->setPosseLink('facebook', 'https://facebook.com/' . $response['id']);
+                                            $object->setPosseLink('facebook', 'https://facebook.com/' . $response['id'], $name);
                                             $object->save();
                                         }
                                     } catch (\FacebookApiException $e) {
