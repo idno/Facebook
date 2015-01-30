@@ -33,9 +33,13 @@
                 }, array('note', 'article', 'image', 'media','rsvp', 'bookmark'));
 
                 if ($this->hasFacebook()) {
-                    if (is_array(\Idno\Core\site()->session()->currentUser()->facebook) && !array_key_exists('access_token', \Idno\Core\site()->session()->currentUser()->facebook)) {
+                    if (is_array(\Idno\Core\site()->session()->currentUser()->facebook)) {
                         foreach(\Idno\Core\site()->session()->currentUser()->facebook as $username => $details) {
-                            \Idno\Core\site()->syndication()->registerServiceAccount('facebook', $username, $details['name']);
+                            if ($username != 'access_token') {
+                                \Idno\Core\site()->syndication()->registerServiceAccount('facebook', $username, $details['name']);
+                            } else {
+                                \Idno\Core\site()->syndication()->registerServiceAccount('facebook', $username, 'Facebook');
+                            }
                         }
                     }
                 }
@@ -236,8 +240,12 @@
                     $facebookAPI = new FacebookAPI();
                     if (!empty($account_id)) {
                         if (!empty(\Idno\Core\site()->session()->currentUser()->facebook[$account_id])) {
-                            $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook[$account_id]['access_token']);
-                            $this->endpoint = $account_id;
+                            if ($account_id == 'Facebook') {
+                                $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
+                            } else {
+                                $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook[$account_id]['access_token']);
+                                $this->endpoint = $account_id;
+                            }
                             return $facebookAPI;
                         }
                     } else {
