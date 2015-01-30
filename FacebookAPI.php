@@ -37,7 +37,7 @@
                 $redirect_url = \Idno\Core\site()->config()->getDisplayURL() . 'facebook/callback';
 
                 $helper = new Facebook\FacebookRedirectLoginHelper($redirect_url);
-                return $helper->getLoginUrl(['public_profile','email','manage_pages']);
+                return $helper->getLoginUrl(['public_profile','email','manage_pages','publish_actions']);
 
             }
 
