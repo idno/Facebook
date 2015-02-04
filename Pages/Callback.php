@@ -21,11 +21,17 @@
                         if ($session = $facebookAPI->getSessionOnLogin()) {
                             $user = \Idno\Core\site()->session()->currentUser();
                             $access_token = $session->getToken();
+                            $expires = 0;
+                            if ($access_obj = $session->getAccessToken()) {
+                                if ($expires = $access_obj->getExpiresAt()) {
+                                    $expires = $expires->getTimestamp();
+                                }
+                            }
                             $facebookAPI->setAccessToken($access_token);
                             if ($person = $facebookAPI->api('/me','GET')) {
                                 $name = $person['response']->getProperty('name');
                                 $id = $person['response']->getProperty('id');
-                                $user->facebook[$id] = ['id' => $id, 'access_token' => $access_token, 'name' => $name];
+                                $user->facebook[$id] = ['id' => $id, 'access_token' => $access_token, 'name' => $name, 'expires' => $expires];
                                 \Idno\Core\site()->syndication()->registerServiceAccount('facebook', $id, $name);
                                 if (\Idno\Core\site()->config()->multipleSyndicationAccounts()) {
                                     if ($companies = $facebookAPI->api('/me/accounts','GET')) {
@@ -38,7 +44,7 @@
                                                             $id = $company['id'];
                                                             $name = $company['name'];
                                                             $access_token = $company['access_token'];
-                                                            $user->facebook[$id] = ['id' => $id, 'access_token' => $access_token, 'name' => $name, 'page' => true];
+                                                            $user->facebook[$id] = ['id' => $id, 'access_token' => $access_token, 'name' => $name, 'page' => true, 'expires' => $expires];
                                                             \Idno\Core\site()->syndication()->registerServiceAccount('facebook', $id, $name);
                                                         }
                                                     }

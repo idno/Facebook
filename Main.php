@@ -36,7 +36,9 @@
                     if (is_array(\Idno\Core\site()->session()->currentUser()->facebook)) {
                         foreach(\Idno\Core\site()->session()->currentUser()->facebook as $username => $details) {
                             if ($username != 'access_token') {
-                                \Idno\Core\site()->syndication()->registerServiceAccount('facebook', $username, $details['name']);
+                                if (empty($details['expiry']) || ($details['expiry'] > time())) {
+                                    \Idno\Core\site()->syndication()->registerServiceAccount('facebook', $username, $details['name']);
+                                }
                             } else {
                                 \Idno\Core\site()->syndication()->registerServiceAccount('facebook', $username, 'Facebook');
                             }
@@ -51,7 +53,7 @@
                         $object      = $eventdata['object'];
                         if (!empty($eventdata['syndication_account'])) {
                             $facebookAPI  = $this->connect($eventdata['syndication_account']);
-                            if (!empty(\Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']])) {
+                            if (!empty(\Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']]['name'])) {
                                 $name = \Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']]['name'];
                             }
                         } else {
@@ -82,6 +84,8 @@
                                         $result['id'] = str_replace('_', '/posts/', $result['id']);
                                         $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id'], $name);
                                         $object->save();
+                                    } else {
+                                        error_log("Nothing was posted to Facebook: " . var_export($result,true));
                                     }
                                 } catch (\Exception $e) {
                                     error_log('There was a problem posting to Facebook: ' . $e->getMessage());
@@ -112,16 +116,23 @@
                             $name = 'Facebook';
                         }
                         if (!empty($facebookAPI)) {
-                            $result = $facebookAPI->api('/'.$this->endpoint.'/feed', 'POST',
-                                array(
-                                    'link'    => $object->getURL(),
-                                    'message' => $object->getTitle(),
-                                    'actions' => json_encode([['name' => 'See Original', 'link' => $object->getURL()]]),
-                                ));
-                            if (!empty($result['id'])) {
-                                $result['id'] = str_replace('_', '/posts/', $result['id']);
-                                $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id'], $name);
-                                $object->save();
+                            try {
+                                $result = $facebookAPI->api('/'.$this->endpoint.'/feed', 'POST',
+                                    array(
+                                        'link'    => $object->getURL(),
+                                        'message' => $object->getTitle(),
+                                        'actions' => json_encode([['name' => 'See Original', 'link' => $object->getURL()]]),
+                                    ));
+                                if (!empty($result['id'])) {
+                                    $result['id'] = str_replace('_', '/posts/', $result['id']);
+                                    $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id'], $name);
+                                    $object->save();
+                                } else {
+                                    error_log("Nothing was posted to Facebook: " . var_export($result,true));
+                                }
+                            } catch (\Exception $e) {
+                                error_log('There was a problem posting to Facebook: ' . $e->getMessage());
+                                \Idno\Core\site()->session()->addMessage('There was a problem posting to Facebook: ' . $e->getMessage());
                             }
                         }
                     }
@@ -148,16 +159,23 @@
                             $name = 'Facebook';
                         }
                         if (!empty($facebookAPI)) {
-                            $result = $facebookAPI->api('/'.$this->endpoint.'/feed', 'POST',
-                                array(
-                                    'link'    => $object->getURL(),
-                                    'message' => $object->getTitle(),
-                                    'actions' => json_encode([['name' => 'See Original', 'link' => $object->getURL()]]),
-                                ));
-                            if (!empty($result['id'])) {
-                                $result['id'] = str_replace('_', '/posts/', $result['id']);
-                                $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id'], $name);
-                                $object->save();
+                            try {
+                                $result = $facebookAPI->api('/'.$this->endpoint.'/feed', 'POST',
+                                    array(
+                                        'link'    => $object->getURL(),
+                                        'message' => $object->getTitle(),
+                                        'actions' => json_encode([['name' => 'See Original', 'link' => $object->getURL()]]),
+                                    ));
+                                if (!empty($result['id'])) {
+                                    $result['id'] = str_replace('_', '/posts/', $result['id']);
+                                    $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id'], $name);
+                                    $object->save();
+                                } else {
+                                    error_log("Nothing was posted to Facebook: " . var_export($result,true));
+                                }
+                            } catch (\Exception $e) {
+                                error_log('There was a problem posting to Facebook: ' . $e->getMessage());
+                                \Idno\Core\site()->session()->addMessage('There was a problem posting to Facebook: ' . $e->getMessage());
                             }
                         }
                     }
@@ -199,6 +217,8 @@
                                             $result['id'] = str_replace('_', '/photos/', $response['id']);
                                             $object->setPosseLink('facebook', 'https://facebook.com/' . $response['id'], $name);
                                             $object->save();
+                                        } else {
+                                            error_log("Nothing was posted to Facebook: " . var_export($result,true));
                                         }
                                     } catch (\FacebookApiException $e) {
                                         error_log('Could not post image to Facebook: ' . $e->getMessage());
@@ -240,13 +260,17 @@
                     $facebookAPI = new FacebookAPI();
                     if (!empty($account_id)) {
                         if (!empty(\Idno\Core\site()->session()->currentUser()->facebook[$account_id])) {
-                            if ($account_id == 'Facebook') {
+                            if ($account_id == 'Facebook' || $account_id == 'access_token') {
                                 $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
                             } else {
                                 $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook[$account_id]['access_token']);
                                 $this->endpoint = $account_id;
                             }
                             return $facebookAPI;
+                        } else {
+                            if ($account_id == 'Facebook' && !empty(\Idno\Core\site()->session()->currentUser()->facebook['access_token'])) {
+                                $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
+                            }
                         }
                     } else {
                         if (!empty(\Idno\Core\site()->session()->currentUser()->facebook['access_token'])) {

@@ -73,7 +73,7 @@
                     $result = array('id' => $response->getProperty('id'), 'response' => $response);
                     return $result;
                 } catch (\Exception $e) {
-                    \Idno\Core\site()->session()->addMessage($e->getMessage());
+                    \Idno\Core\site()->logging()->log($e->getMessage());
                     return false;
                 }
 
