@@ -2,6 +2,8 @@
 
     namespace IdnoPlugins\Facebook {
 
+        use Idno\Core\Webservice;
+
         class Main extends \Idno\Common\Plugin
         {
 
@@ -79,6 +81,7 @@
                                     $params['link'] = $matches[0]; // Set the first discovered link as the match
                                 }
                                 try {
+                                    $this->warmFacebookCache($object->getURL());
                                     $result = $facebookAPI->api('/'.$this->endpoint.'/feed', 'POST', $params);
                                     if (!empty($result['id'])) {
                                         $result['id'] = str_replace('_', '/posts/', $result['id']);
@@ -117,6 +120,7 @@
                         }
                         if (!empty($facebookAPI)) {
                             try {
+                                $this->warmFacebookCache($object->getURL());
                                 $result = $facebookAPI->api('/'.$this->endpoint.'/feed', 'POST',
                                     array(
                                         'link'    => $object->getURL(),
@@ -282,6 +286,17 @@
                 }
 
                 return false;
+            }
+
+            /**
+             * Facebook is silly and needs to have its cache warmed up before you post.
+             * @param $url
+             */
+            function warmFacebookCache($url)
+            {
+                $client = new Webservice();
+                $result = $client->post('https://graph.facebook.com/',['id' => $url, 'scrape' => 'true']);
+                error_log('Facebook cache result: ' . json_encode($result));
             }
 
             /**
