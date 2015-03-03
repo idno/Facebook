@@ -79,6 +79,7 @@
                                 );
                                 if (preg_match('/(?<!=)(?<!["\'])((ht|f)tps?:\/\/[^\s\r\n\t<>"\'\(\)]+)/i', $message, $matches)) {
                                     $params['link'] = $matches[0]; // Set the first discovered link as the match
+                                    $params['message'] = str_replace($params['link'],'',$params['message']);
                                 }
                                 try {
                                     $this->warmFacebookCache($object->getURL());
