@@ -1,6 +1,6 @@
 <div class="row">
 
-    <div class="span10 offset1">
+    <div class="col-md-10 col-md-offset-1">
 	            <?=$this->draw('admin/menu')?>
         <h1>Facebook configuration</h1>
 
@@ -8,9 +8,9 @@
 
 </div>
 <div class="row">
-    <div class="span10 offset1">
+    <div class="col-md-10 col-md-offset-1">
         <form action="<?=\Idno\Core\site()->config()->getDisplayURL()?>admin/facebook/" class="form-horizontal" method="post">
-            <div class="control-group">
+            <div class="controls-group">
                 <div class="controls-config">
                     <p>
                         To begin using Facebook, <a href="https://developers.facebook.com/apps" target="_blank">create a new application in
@@ -24,31 +24,32 @@
                     </p>
                 </div>
             </div>
-            <div class="control-group">
-                <label class="control-label" for="name">App ID</label>
-                <div class="controls">
-                    <input type="text" id="name" placeholder="App ID" class="span6" name="appId" value="<?=htmlspecialchars(\Idno\Core\site()->config()->facebook['appId'])?>" >
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label" for="name">App secret</label>
-                <div class="controls">
-                    <input type="text" id="name" placeholder="App secret" class="span6" name="secret" value="<?=htmlspecialchars(\Idno\Core\site()->config()->facebook['secret'])?>" >
-                </div>
+            
+            <div class="controls-group">
+                <label class="control-label" for="app-id">App ID</label><br>
+                
+                    <input type="text" id="app-id" placeholder="App ID" class="form-control" name="appId" value="<?=htmlspecialchars(\Idno\Core\site()->config()->facebook['appId'])?>" >
+
+                <label class="control-label" for="app-secret">App secret</label><br>
+                
+                    <input type="text" id="app-secret" placeholder="App secret" class="form-control" name="secret" value="<?=htmlspecialchars(\Idno\Core\site()->config()->facebook['secret'])?>" >
+
             </div>
             
                         
-                      <div class="control-group">
-	          <p>
-                        After the Facebook application is configured, you must connect under account Settings.
-                    </p>
+            <div class="controls-group">
+					  	<p>
+                        After the Facebook application is configured, site users must authenticate their Facebook account under Settings.
+						</p>
 
-          </div> 
-            <div class="control-group">
+            </div> 
+          	<div>
+
                 <div class="controls-save">
                     <button type="submit" class="btn btn-primary">Save settings</button>
                 </div>
-            </div>
+          	</div>
+
             <?= \Idno\Core\site()->actions()->signForm('/admin/facebook/')?>
         </form>
     </div>
