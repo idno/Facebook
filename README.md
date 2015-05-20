@@ -10,6 +10,11 @@ Installation
 * Log into Known and click on Administration.
 * Click "install" next to Facebook.
 
+Troubleshooting
+---------------
+
+* **My posts appear on Facebook, but only I can see them!** When your Facebook application is in developer mode, posts can only be seen by you or other developers of the app. Take it out of this mode to have those posts available to others.
+
 License
 -------
 
