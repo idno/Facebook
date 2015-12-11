@@ -80,6 +80,11 @@
                                 if (preg_match('/(?<!=)(?<!["\'])((ht|f)tps?:\/\/[^\s\r\n\t<>"\'\(\)]+)/i', $message, $matches)) {
                                     $params['link'] = $matches[0]; // Set the first discovered link as the match
                                     $params['message'] = str_replace($params['link'],'',$params['message']);
+                                    foreach(['youtube.com','youtu.be','vimeo.com'] as $video_domain) {
+                                        if (substr_count($video_domain, $params['link'])) {
+                                            ubset($params['actions']);  // Facebook doesn't like "actions" to co-exist with video links
+                                        }
+                                    }
                                 }
                                 try {
                                     $this->warmFacebookCache($object->getURL());
