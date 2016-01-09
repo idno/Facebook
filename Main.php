@@ -34,19 +34,21 @@
                     return $this->hasFacebook();
                 }, array('note', 'article', 'image', 'media','rsvp', 'bookmark'));
 
-                if ($this->hasFacebook()) {
-                    if (is_array(\Idno\Core\site()->session()->currentUser()->facebook)) {
-                        foreach(\Idno\Core\site()->session()->currentUser()->facebook as $username => $details) {
-                            if ($username != 'access_token') {
-                                if (empty($details['expiry']) || ($details['expiry'] > time())) {
-                                    \Idno\Core\site()->syndication()->registerServiceAccount('facebook', $username, $details['name']);
+                \Idno\Core\site()->addEventHook('user/auth/success', function (\Idno\Core\Event $event) {
+                    if ($this->hasFacebook()) {
+                        if (is_array(\Idno\Core\Idno::site()->session()->currentUser()->facebook)) {
+                            foreach(\Idno\Core\Idno::site()->session()->currentUser()->facebook as $username => $details) {
+                                if ($username != 'access_token') {
+                                    if (empty($details['expiry']) || ($details['expiry'] > time())) {
+                                        \Idno\Core\Idno::site()->syndication()->registerServiceAccount('facebook', $username, $details['name']);
+                                    }
+                                } else {
+                                    \Idno\Core\Idno::site()->syndication()->registerServiceAccount('facebook', $username, 'Facebook');
                                 }
-                            } else {
-                                \Idno\Core\site()->syndication()->registerServiceAccount('facebook', $username, 'Facebook');
                             }
                         }
                     }
-                }
+                });
 
                 $notes_function = function (\Idno\Core\Event $event) {
                     $eventdata = $event->data();
