@@ -211,6 +211,8 @@
                                 }
                                 if (!empty($facebookAPI)) {
                                     $message = strip_tags($object->getTitle()) . "\n\n" . strip_tags($object->getDescription());
+                                    // Strip out "Untitled"
+                                    $message = str_replace("Untitled\n\n",'',$message);
                                     $message .= "\n\nOriginal: " . $object->getURL();
                                     try {
                                         //$facebookAPI->setFileUploadSupport(true);
