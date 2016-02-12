@@ -69,6 +69,8 @@
                         if (!empty($facebookAPI)) {
                             $message = preg_replace('/<[^\>]*>/', '', $object->getDescription()); //strip_tags($object->getDescription());
 
+                            $message = html_entity_decode($message);
+
                             // Obey the IndieWeb reference setting
                             if (!substr_count($message, \Idno\Core\site()->config()->host) && \Idno\Core\site()->config()->indieweb_reference) {
                                 $message .= "\n\n(" . $object->getShortURL(true, false) . ")";
@@ -132,8 +134,8 @@
                                 $result = $facebookAPI->api('/'.$this->endpoint.'/feed', 'POST',
                                     array(
                                         'link'    => $object->getURL(),
-                                        'message' => $object->getTitle(),
-                                        'actions' => json_encode([['name' => 'See Original', 'link' => $object->getURL()]]),
+                                        'message' => $message = html_entity_decode($object->getTitle()),
+                                        //'actions' => json_encode([['name' => 'See Original', 'link' => $object->getURL()]]),
                                     ));
                                 if (!empty($result['id'])) {
                                     $result['id'] = str_replace('_', '/posts/', $result['id']);
@@ -175,8 +177,8 @@
                                 $result = $facebookAPI->api('/'.$this->endpoint.'/feed', 'POST',
                                     array(
                                         'link'    => $object->getURL(),
-                                        'message' => $object->getTitle(),
-                                        'actions' => json_encode([['name' => 'See Original', 'link' => $object->getURL()]]),
+                                        'message' => $message = html_entity_decode($object->getTitle()),
+                                        //'actions' => json_encode([['name' => 'See Original', 'link' => $object->getURL()]]),
                                     ));
                                 if (!empty($result['id'])) {
                                     $result['id'] = str_replace('_', '/posts/', $result['id']);
@@ -213,6 +215,7 @@
                                 }
                                 if (!empty($facebookAPI)) {
                                     $message = strip_tags($object->getTitle()) . "\n\n" . strip_tags($object->getDescription());
+                                    $message = html_entity_decode($message);
                                     // Strip out "Untitled"
                                     $message = str_replace("Untitled\n\n",'',$message);
                                     $message .= "\n\nOriginal: " . $object->getURL();
