@@ -79,7 +79,6 @@
                             if (!empty($message) && substr($message, 0, 1) != '@') {
                                 $params = array(
                                     'message' => $message,
-                                    'actions' => json_encode([['name' => 'See Original', 'link' => $object->getURL()]]),
                                 );
                                 if (preg_match('/(?<!=)(?<!["\'])((ht|f)tps?:\/\/[^\s\r\n\t<>"\'\(\)]+)/i', $message, $matches)) {
                                     $params['link'] = $matches[0]; // Set the first discovered link as the match
@@ -135,7 +134,6 @@
                                     array(
                                         'link'    => $object->getURL(),
                                         'message' => $message = html_entity_decode($object->getTitle()),
-                                        //'actions' => json_encode([['name' => 'See Original', 'link' => $object->getURL()]]),
                                     ));
                                 if (!empty($result['id'])) {
                                     $result['id'] = str_replace('_', '/posts/', $result['id']);
@@ -178,7 +176,6 @@
                                     array(
                                         'link'    => $object->getURL(),
                                         'message' => $message = html_entity_decode($object->getTitle()),
-                                        //'actions' => json_encode([['name' => 'See Original', 'link' => $object->getURL()]]),
                                     ));
                                 if (!empty($result['id'])) {
                                     $result['id'] = str_replace('_', '/posts/', $result['id']);
@@ -227,7 +224,6 @@
                                             array(
                                                 'message' => $message,
                                                 'url'     => $attachment['url'],
-                                                'actions' => json_encode([['name' => 'See Original', 'link' => $object->getURL()]]),
                                             )
                                         );
                                         if (!empty($response['id'])) {
