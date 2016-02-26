@@ -95,7 +95,7 @@
                                     $result = $facebookAPI->api('/'.$this->endpoint.'/feed', 'POST', $params);
                                     if (!empty($result['id'])) {
                                         $result['id'] = str_replace('_', '/posts/', $result['id']);
-                                        $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id'], $name);
+                                        $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id'], $name, "", $name);
                                         $object->save();
                                     } else {
                                         error_log("Nothing was posted to Facebook: " . var_export($result,true));
@@ -139,7 +139,7 @@
                                     ));
                                 if (!empty($result['id'])) {
                                     $result['id'] = str_replace('_', '/posts/', $result['id']);
-                                    $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id'], $name);
+                                    $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id'], $name, "", $name);
                                     $object->save();
                                 } else {
                                     error_log("Nothing was posted to Facebook: " . var_export($result,true));
@@ -182,7 +182,7 @@
                                     ));
                                 if (!empty($result['id'])) {
                                     $result['id'] = str_replace('_', '/posts/', $result['id']);
-                                    $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id'], $name);
+                                    $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id'], $name, "", $name);
                                     $object->save();
                                 } else {
                                     error_log("Nothing was posted to Facebook: " . var_export($result,true));
@@ -232,7 +232,7 @@
                                         );
                                         if (!empty($response['id'])) {
                                             $result['id'] = str_replace('_', '/photos/', $response['id']);
-                                            $object->setPosseLink('facebook', 'https://facebook.com/' . $response['id'], $name);
+                                            $object->setPosseLink('facebook', 'https://facebook.com/' . $response['id'], $name, "", $name);
                                             $object->save();
                                         } else {
                                             error_log("Nothing was posted to Facebook: " . var_export($result,true));
