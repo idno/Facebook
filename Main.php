@@ -135,6 +135,8 @@
 
                 // Push RSVPs to Facebook
                 Idno::site()->addEventHook('post/rsvp/facebook', function (\Idno\Core\Event $event) {
+                    Idno::site()->logging()->debug("publishing RSVP to Facebook");
+
                     $eventdata   = $event->data();
                     $object      = $eventdata['object'];
                     $facebookAPI = $this->getFacebookAPI($eventdata['syndication_account']);
@@ -287,14 +289,14 @@
                     Idno::site()->logging()->debug("Fetching $original to look for syndication links");
                     $resp   = Webservice::get($original);
                     if ($resp['response'] >= 200 && $resp['response'] < 300) {
-                        $d = \Mf2\Parser($resp['content'], $original)->parse();
+                        $d = (new \Mf2\Parser($resp['content'], $original))->parse();
                         $urls = [];
                         if (!empty($d['rels']['syndication'])) {
                             $urls = array_merge($urls, $d['rels']['syndication']);
                         }
                         if (!empty($d['items'])) {
                             foreach ($d['items'] as $item) {
-                                if (in_array('h-entry', $item['type'])
+                                if ((in_array('h-entry', $item['type']) || in_array('h-event', $item['type']))
                                         && !empty($item['properties']['syndication'])) {
                                     $urls = array_merge($urls, $item['properties']['syndication']);
                                 }
