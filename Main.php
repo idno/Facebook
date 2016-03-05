@@ -27,6 +27,26 @@
                 \Idno\Core\site()->template()->extendTemplate('onboarding/connect/networks', 'onboarding/connect/facebook');
             }
 
+            private function getFacebookAPI($syndicationAccount)
+            {
+                if ($this->hasFacebook()) {
+                    if (!empty($syndicationAccount)) {
+                        return $this->connect($syndicationAccount);
+                    }
+                    return  $this->connect();
+                }
+                return false;
+            }
+
+            private function getDisplayName($syndicationAccount)
+            {
+                if (!empty($syndicationAccount)
+                        && !empty(\Idno\Core\site()->session()->currentUser()->facebook[$syndicationAccount]['name'])) {
+                    return \Idno\Core\site()->session()->currentUser()->facebook[$syndicationAccount]['name'];
+                }
+                return 'Facebook';
+            }
+
             function registerEventHooks()
             {
 
@@ -52,20 +72,10 @@
 
                 $notes_function = function (\Idno\Core\Event $event) {
                     $eventdata = $event->data();
-                    $object = $eventdata['object'];
                     if ($this->hasFacebook()) {
                         $object      = $eventdata['object'];
-                        if (!empty($eventdata['syndication_account'])) {
-                            $facebookAPI  = $this->connect($eventdata['syndication_account']);
-                            if (!empty(\Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']]['name'])) {
-                                $name = \Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']]['name'];
-                            }
-                        } else {
-                            $facebookAPI  = $this->connect();
-                        }
-                        if (empty($name)) {
-                            $name = 'Facebook';
-                        }
+                        $facebookAPI = $this->getFacebookAPI($eventdata['syndication_account']);
+                        $name        = $this->getDisplayName($eventdata['syndication_account']);
                         if (!empty($facebookAPI)) {
                             $message = preg_replace('/<[^\>]*>/', '', $object->getDescription()); //strip_tags($object->getDescription());
 
@@ -112,21 +122,13 @@
                 \Idno\Core\site()->addEventHook('post/note/facebook', $notes_function);
                 \Idno\Core\site()->addEventHook('post/bookmark/facebook', $notes_function);
 
-                $article_function = function (\Idno\Core\Event $event) {
+                // Push "articles" to Facebook
+                \Idno\Core\site()->addEventHook('post/article/facebook', function (\Idno\Core\Event $event) {
                     $eventdata = $event->data();
-                    $object = $eventdata['object'];
                     if ($this->hasFacebook()) {
-                        if (!empty($eventdata['syndication_account'])) {
-                            $facebookAPI  = $this->connect($eventdata['syndication_account']);
-                            if (!empty(\Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']])) {
-                                $name = \Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']]['name'];
-                            }
-                        } else {
-                            $facebookAPI  = $this->connect();
-                        }
-                        if (empty($name)) {
-                            $name = 'Facebook';
-                        }
+                        $object      = $eventdata['object'];
+                        $facebookAPI = $this->getFacebookAPI($eventdata['syndication_account']);
+                        $name        = $this->getDisplayName($eventdata['syndication_account']);
                         if (!empty($facebookAPI)) {
                             try {
                                 $this->warmFacebookCache($object->getURL());
@@ -148,28 +150,51 @@
                             }
                         }
                     }
-                };
+                });
 
-                // Push "articles" and "rsvps" to Facebook
-                \Idno\Core\site()->addEventHook('post/rsvp/facebook', $article_function);
-                \Idno\Core\site()->addEventHook('post/article/facebook', $article_function);
+                // Push RSVPs to Facebook
+                \Idno\Core\site()->addEventHook('post/rsvp/facebook', function (\Idno\Core\Event $event) {
+                    $eventdata   = $event->data();
+                    $object      = $eventdata['object'];
+                    $facebookAPI = $this->getFacebookAPI($eventdata['syndication_account']);
+                    $name        = $this->getDisplayName($eventdata['syndication_account']);
+                    if ($facebookAPI) {
+                        $eventId = false;
+                        foreach ((array) $object->inreplyto as $inreplyto) {
+                            // does this look like a facebook event?
+                            if (preg_match('#https?://(?:www\.|m\.)?facebook.com/events/(\d+)/?#', $inreplyto, $matches)) {
+                                $eventId  = $matches[1];
+                                break;
+                            }
+                        }
+
+                        if ($eventId) {
+                            $endpoint = false;
+                            if ($object->rsvp === 'yes') {
+                                $endpoint = "/$eventId/attending";
+                            } else if ($object->rsvp === 'no') {
+                                $endpoint = "/$eventId/declined";
+                            } else if ($object->rsvp === 'maybe') {
+                                $endpoint = "/$eventId/maybe";
+                            }
+
+                            if ($endpoint) {
+                                $response = $facebookAPI->api($endpoint, 'POST');
+                                \Idno\Core\Idno::site()->logging()->info("publish response from Facebook", ['response' => $response]);
+                            }
+                        }
+
+                    }
+
+                });
 
                 // Push "media" to Facebook
                 \Idno\Core\site()->addEventHook('post/media/facebook', function (\Idno\Core\Event $event) {
                     $eventdata = $event->data();
-                    $object = $eventdata['object'];
                     if ($this->hasFacebook()) {
-                        if (!empty($eventdata['syndication_account'])) {
-                            $facebookAPI  = $this->connect($eventdata['syndication_account']);
-                            if (!empty(\Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']])) {
-                                $name = \Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']]['name'];
-                            }
-                        } else {
-                            $facebookAPI  = $this->connect();
-                        }
-                        if (empty($name)) {
-                            $name = 'Facebook';
-                        }
+                        $object      = $eventdata['object'];
+                        $facebookAPI = $this->getFacebookAPI($eventdata['syndication_account']);
+                        $name        = $this->getDisplayName($eventdata['syndication_account']);
                         if (!empty($facebookAPI)) {
                             try {
                                 $result = $facebookAPI->api('/'.$this->endpoint.'/feed', 'POST',
@@ -199,17 +224,8 @@
                     if ($attachments = $object->getAttachments()) {
                         foreach ($attachments as $attachment) {
                             if ($this->hasFacebook()) {
-                                if (!empty($eventdata['syndication_account'])) {
-                                    $facebookAPI  = $this->connect($eventdata['syndication_account']);
-                                    if (!empty(\Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']])) {
-                                        $name = \Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']]['name'];
-                                    }
-                                } else {
-                                    $facebookAPI  = $this->connect();
-                                }
-                                if (empty($name)) {
-                                    $name = 'Facebook';
-                                }
+                                $facebookAPI = $this->getFacebookAPI($eventdata['syndication_account']);
+                                $name        = $this->getDisplayName($eventdata['syndication_account']);
                                 if (!empty($facebookAPI)) {
                                     $message = strip_tags($object->getTitle()) . "\n\n" . strip_tags($object->getDescription());
                                     $message = html_entity_decode($message);
