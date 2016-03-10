@@ -2,6 +2,7 @@
 
     namespace IdnoPlugins\Facebook {
 
+        use Idno\Core\Idno;
         use Idno\Core\Webservice;
 
         class Main extends \Idno\Common\Plugin
@@ -12,38 +13,38 @@
             function registerPages()
             {
                 // Deauth URL
-                \Idno\Core\site()->addPageHandler('facebook/deauth', '\IdnoPlugins\Facebook\Pages\Deauth');
+                Idno::site()->addPageHandler('facebook/deauth', '\IdnoPlugins\Facebook\Pages\Deauth');
                 // Register the callback URL
-                \Idno\Core\site()->addPageHandler('facebook/callback', '\IdnoPlugins\Facebook\Pages\Callback');
+                Idno::site()->addPageHandler('facebook/callback', '\IdnoPlugins\Facebook\Pages\Callback');
                 // Register admin settings
-                \Idno\Core\site()->addPageHandler('admin/facebook', '\IdnoPlugins\Facebook\Pages\Admin');
+                Idno::site()->addPageHandler('admin/facebook', '\IdnoPlugins\Facebook\Pages\Admin');
                 // Register settings page
-                \Idno\Core\site()->addPageHandler('account/facebook', '\IdnoPlugins\Facebook\Pages\Account');
+                Idno::site()->addPageHandler('account/facebook', '\IdnoPlugins\Facebook\Pages\Account');
 
                 /** Template extensions */
                 // Add menu items to account & administration screens
-                \Idno\Core\site()->template()->extendTemplate('admin/menu/items', 'admin/facebook/menu');
-                \Idno\Core\site()->template()->extendTemplate('account/menu/items', 'account/facebook/menu');
-                \Idno\Core\site()->template()->extendTemplate('onboarding/connect/networks', 'onboarding/connect/facebook');
+                Idno::site()->template()->extendTemplate('admin/menu/items', 'admin/facebook/menu');
+                Idno::site()->template()->extendTemplate('account/menu/items', 'account/facebook/menu');
+                Idno::site()->template()->extendTemplate('onboarding/connect/networks', 'onboarding/connect/facebook');
             }
 
             function registerEventHooks()
             {
 
-                \Idno\Core\site()->syndication()->registerService('facebook', function () {
+                Idno::site()->syndication()->registerService('facebook', function () {
                     return $this->hasFacebook();
                 }, array('note', 'article', 'image', 'media','rsvp', 'bookmark'));
 
-                \Idno\Core\site()->addEventHook('user/auth/success', function (\Idno\Core\Event $event) {
+                Idno::site()->addEventHook('user/auth/success', function (\Idno\Core\Event $event) {
                     if ($this->hasFacebook()) {
-                        if (is_array(\Idno\Core\Idno::site()->session()->currentUser()->facebook)) {
-                            foreach(\Idno\Core\Idno::site()->session()->currentUser()->facebook as $username => $details) {
+                        if (is_array(Idno::site()->session()->currentUser()->facebook)) {
+                            foreach(Idno::site()->session()->currentUser()->facebook as $username => $details) {
                                 if ($username != 'access_token') {
                                     if (empty($details['expiry']) || ($details['expiry'] > time())) {
-                                        \Idno\Core\Idno::site()->syndication()->registerServiceAccount('facebook', $username, $details['name']);
+                                        Idno::site()->syndication()->registerServiceAccount('facebook', $username, $details['name']);
                                     }
                                 } else {
-                                    \Idno\Core\Idno::site()->syndication()->registerServiceAccount('facebook', $username, 'Facebook');
+                                    Idno::site()->syndication()->registerServiceAccount('facebook', $username, 'Facebook');
                                 }
                             }
                         }
@@ -52,27 +53,17 @@
 
                 $notes_function = function (\Idno\Core\Event $event) {
                     $eventdata = $event->data();
-                    $object = $eventdata['object'];
                     if ($this->hasFacebook()) {
                         $object      = $eventdata['object'];
-                        if (!empty($eventdata['syndication_account'])) {
-                            $facebookAPI  = $this->connect($eventdata['syndication_account']);
-                            if (!empty(\Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']]['name'])) {
-                                $name = \Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']]['name'];
-                            }
-                        } else {
-                            $facebookAPI  = $this->connect();
-                        }
-                        if (empty($name)) {
-                            $name = 'Facebook';
-                        }
+                        $facebookAPI = $this->getFacebookAPI($eventdata['syndication_account']);
+                        $name        = $this->getDisplayName($eventdata['syndication_account']);
                         if (!empty($facebookAPI)) {
                             $message = preg_replace('/<[^\>]*>/', '', $object->getDescription()); //strip_tags($object->getDescription());
 
                             $message = html_entity_decode($message);
 
                             // Obey the IndieWeb reference setting
-                            if (!substr_count($message, \Idno\Core\site()->config()->host) && \Idno\Core\site()->config()->indieweb_reference) {
+                            if (!substr_count($message, Idno::site()->config()->host) && Idno::site()->config()->indieweb_reference) {
                                 $message .= "\n\n(" . $object->getShortURL(true, false) . ")";
                             }
 
@@ -101,7 +92,7 @@
                                     }
                                 } catch (\Exception $e) {
                                     error_log('There was a problem posting to Facebook: ' . $e->getMessage());
-                                    \Idno\Core\site()->session()->addMessage('There was a problem posting to Facebook: ' . $e->getMessage());
+                                    Idno::site()->session()->addMessage('There was a problem posting to Facebook: ' . $e->getMessage());
                                 }
                             }
                         }
@@ -109,24 +100,16 @@
                 };
 
                 // Push "notes" to Facebook
-                \Idno\Core\site()->addEventHook('post/note/facebook', $notes_function);
-                \Idno\Core\site()->addEventHook('post/bookmark/facebook', $notes_function);
+                Idno::site()->addEventHook('post/note/facebook', $notes_function);
+                Idno::site()->addEventHook('post/bookmark/facebook', $notes_function);
 
-                $article_function = function (\Idno\Core\Event $event) {
+                // Push "articles" to Facebook
+                Idno::site()->addEventHook('post/article/facebook', function (\Idno\Core\Event $event) {
                     $eventdata = $event->data();
-                    $object = $eventdata['object'];
                     if ($this->hasFacebook()) {
-                        if (!empty($eventdata['syndication_account'])) {
-                            $facebookAPI  = $this->connect($eventdata['syndication_account']);
-                            if (!empty(\Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']])) {
-                                $name = \Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']]['name'];
-                            }
-                        } else {
-                            $facebookAPI  = $this->connect();
-                        }
-                        if (empty($name)) {
-                            $name = 'Facebook';
-                        }
+                        $object      = $eventdata['object'];
+                        $facebookAPI = $this->getFacebookAPI($eventdata['syndication_account']);
+                        $name        = $this->getDisplayName($eventdata['syndication_account']);
                         if (!empty($facebookAPI)) {
                             try {
                                 $this->warmFacebookCache($object->getURL());
@@ -144,32 +127,53 @@
                                 }
                             } catch (\Exception $e) {
                                 error_log('There was a problem posting to Facebook: ' . $e->getMessage());
-                                \Idno\Core\site()->session()->addMessage('There was a problem posting to Facebook: ' . $e->getMessage());
+                                Idno::site()->session()->addMessage('There was a problem posting to Facebook: ' . $e->getMessage());
                             }
                         }
                     }
-                };
+                });
 
-                // Push "articles" and "rsvps" to Facebook
-                \Idno\Core\site()->addEventHook('post/rsvp/facebook', $article_function);
-                \Idno\Core\site()->addEventHook('post/article/facebook', $article_function);
+                // Push RSVPs to Facebook
+                Idno::site()->addEventHook('post/rsvp/facebook', function (\Idno\Core\Event $event) {
+                    Idno::site()->logging()->debug("publishing RSVP to Facebook");
+
+                    $eventdata   = $event->data();
+                    $object      = $eventdata['object'];
+                    $facebookAPI = $this->getFacebookAPI($eventdata['syndication_account']);
+                    $name        = $this->getDisplayName($eventdata['syndication_account']);
+                    if ($facebookAPI) {
+
+                        $eventRegex = '#https?://(?:www\.|m\.)?facebook.com/events/(\d+)/?#';
+                        $eventUrl   = $this->possePostDiscovery($object->inreplyto, $eventRegex);
+
+                        if ($eventUrl && preg_match($eventRegex, $eventUrl, $matches)) {
+                            $eventId = $matches[1];
+
+                            $endpoint = false;
+                            if ($object->rsvp === 'yes') {
+                                $endpoint = "/$eventId/attending";
+                            } else if ($object->rsvp === 'no') {
+                                $endpoint = "/$eventId/declined";
+                            } else if ($object->rsvp === 'maybe') {
+                                $endpoint = "/$eventId/maybe";
+                            }
+
+                            if ($endpoint) {
+                                Idno::site()->logging()->debug("publishing rsvp to Facebook on $endpoint");
+                                $response = $facebookAPI->api($endpoint, 'POST');
+                                Idno::site()->logging()->debug("publish response from Facebook", ['response' => $response]);
+                            }
+                        }
+                    }
+                });
 
                 // Push "media" to Facebook
-                \Idno\Core\site()->addEventHook('post/media/facebook', function (\Idno\Core\Event $event) {
+                Idno::site()->addEventHook('post/media/facebook', function (\Idno\Core\Event $event) {
                     $eventdata = $event->data();
-                    $object = $eventdata['object'];
                     if ($this->hasFacebook()) {
-                        if (!empty($eventdata['syndication_account'])) {
-                            $facebookAPI  = $this->connect($eventdata['syndication_account']);
-                            if (!empty(\Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']])) {
-                                $name = \Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']]['name'];
-                            }
-                        } else {
-                            $facebookAPI  = $this->connect();
-                        }
-                        if (empty($name)) {
-                            $name = 'Facebook';
-                        }
+                        $object      = $eventdata['object'];
+                        $facebookAPI = $this->getFacebookAPI($eventdata['syndication_account']);
+                        $name        = $this->getDisplayName($eventdata['syndication_account']);
                         if (!empty($facebookAPI)) {
                             try {
                                 $result = $facebookAPI->api('/'.$this->endpoint.'/feed', 'POST',
@@ -186,30 +190,21 @@
                                 }
                             } catch (\Exception $e) {
                                 error_log('There was a problem posting to Facebook: ' . $e->getMessage());
-                                \Idno\Core\site()->session()->addMessage('There was a problem posting to Facebook: ' . $e->getMessage());
+                                Idno::site()->session()->addMessage('There was a problem posting to Facebook: ' . $e->getMessage());
                             }
                         }
                     }
                 });
 
                 // Push "images" to Facebook
-                \Idno\Core\site()->addEventHook('post/image/facebook', function (\Idno\Core\Event $event) {
+                Idno::site()->addEventHook('post/image/facebook', function (\Idno\Core\Event $event) {
                     $eventdata = $event->data();
                     $object = $eventdata['object'];
                     if ($attachments = $object->getAttachments()) {
                         foreach ($attachments as $attachment) {
                             if ($this->hasFacebook()) {
-                                if (!empty($eventdata['syndication_account'])) {
-                                    $facebookAPI  = $this->connect($eventdata['syndication_account']);
-                                    if (!empty(\Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']])) {
-                                        $name = \Idno\Core\site()->session()->currentUser()->facebook[$eventdata['syndication_account']]['name'];
-                                    }
-                                } else {
-                                    $facebookAPI  = $this->connect();
-                                }
-                                if (empty($name)) {
-                                    $name = 'Facebook';
-                                }
+                                $facebookAPI = $this->getFacebookAPI($eventdata['syndication_account']);
+                                $name        = $this->getDisplayName($eventdata['syndication_account']);
                                 if (!empty($facebookAPI)) {
                                     $message = strip_tags($object->getTitle()) . "\n\n" . strip_tags($object->getDescription());
                                     $message = html_entity_decode($message);
@@ -243,6 +238,84 @@
                 });
             }
 
+
+            private function getFacebookAPI($syndicationAccount)
+            {
+                if ($this->hasFacebook()) {
+                    if (!empty($syndicationAccount)) {
+                        return $this->connect($syndicationAccount);
+                    }
+                    return  $this->connect();
+                }
+                return false;
+            }
+
+            private function getDisplayName($syndicationAccount)
+            {
+                if (!empty($syndicationAccount)
+                        && !empty(Idno::site()->session()->currentUser()->facebook[$syndicationAccount]['name'])) {
+                    return Idno::site()->session()->currentUser()->facebook[$syndicationAccount]['name'];
+                }
+                return 'Facebook';
+            }
+
+            /**
+             * Given an array of original URLs and a permalink regex,
+             * looks for silo-specific syndication URLs. If the
+             * original is a silo url, that url is returned; otherwise
+             * we fetch the source and attempt to look for
+             * rel-syndication and u-syndication URLs.
+             *
+             * TODO merge this with Webmention::addSyndicatedReplyTargets?
+             *
+             * @param array $originals the original URLs to fetch and
+             *  search for syndication links
+             * @param string $regex the regex that matches syndication
+             *  links for this source
+             * @return a string matching the regex or false
+             */
+            private function possePostDiscovery($originals, $regex)
+            {
+                $originals = (array) $originals;
+
+                foreach ($originals as $original) {
+                    if (preg_match($regex, $original)) {
+                        Idno::site()->logging()->debug("Found a matching url in the original list: $original");
+                        return $original;
+                    }
+                }
+
+                foreach ($originals as $original) {
+                    Idno::site()->logging()->debug("Fetching $original to look for syndication links");
+                    $resp   = Webservice::get($original);
+                    if ($resp['response'] >= 200 && $resp['response'] < 300) {
+                        $d = (new \Mf2\Parser($resp['content'], $original))->parse();
+                        $urls = [];
+                        if (!empty($d['rels']['syndication'])) {
+                            $urls = array_merge($urls, $d['rels']['syndication']);
+                        }
+                        if (!empty($d['items'])) {
+                            foreach ($d['items'] as $item) {
+                                if ((in_array('h-entry', $item['type']) || in_array('h-event', $item['type']))
+                                        && !empty($item['properties']['syndication'])) {
+                                    $urls = array_merge($urls, $item['properties']['syndication']);
+                                }
+                            }
+                        }
+                        foreach ($urls as $url) {
+                            if (preg_match($regex, $url)) {
+                                Idno::site()->logging()->debug("Discovered a matching url in the syndication links $url");
+                                return $url;
+                            }
+                        }
+                    } else {
+                        Idno::site()->logging()->warning("Failed to fetch $original: status={$resp['response']}, error={$resp['error']}");
+                    }
+                }
+
+                return false;
+            }
+
             /**
              * Retrieve the URL to authenticate with Facebook
              * @return string
@@ -262,32 +335,32 @@
              */
             function connect($account_id = '')
             {
-                if (!empty(\Idno\Core\site()->config()->facebook)) {
+                if (!empty(Idno::site()->config()->facebook)) {
 
                     require_once(dirname(__FILE__) . '/external/facebook-sdk/autoload.php');
                     \Facebook\FacebookSession::setDefaultApplication(
-                        \Idno\Core\site()->config()->facebook['appId'],
-                        \Idno\Core\site()->config()->facebook['secret']
+                        Idno::site()->config()->facebook['appId'],
+                        Idno::site()->config()->facebook['secret']
                     );
 
                     $facebookAPI = new FacebookAPI();
                     if (!empty($account_id)) {
-                        if (!empty(\Idno\Core\site()->session()->currentUser()->facebook[$account_id])) {
+                        if (!empty(Idno::site()->session()->currentUser()->facebook[$account_id])) {
                             if ($account_id == 'Facebook' || $account_id == 'access_token') {
-                                $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
+                                $facebookAPI->setAccessToken(Idno::site()->session()->currentUser()->facebook['access_token']);
                             } else {
-                                $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook[$account_id]['access_token']);
+                                $facebookAPI->setAccessToken(Idno::site()->session()->currentUser()->facebook[$account_id]['access_token']);
                                 $this->endpoint = $account_id;
                             }
                             return $facebookAPI;
                         } else {
-                            if ($account_id == 'Facebook' && !empty(\Idno\Core\site()->session()->currentUser()->facebook['access_token'])) {
-                                $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
+                            if ($account_id == 'Facebook' && !empty(Idno::site()->session()->currentUser()->facebook['access_token'])) {
+                                $facebookAPI->setAccessToken(Idno::site()->session()->currentUser()->facebook['access_token']);
                             }
                         }
                     } else {
-                        if (!empty(\Idno\Core\site()->session()->currentUser()->facebook['access_token'])) {
-                            $facebookAPI->setAccessToken(\Idno\Core\site()->session()->currentUser()->facebook['access_token']);
+                        if (!empty(Idno::site()->session()->currentUser()->facebook['access_token'])) {
+                            $facebookAPI->setAccessToken(Idno::site()->session()->currentUser()->facebook['access_token']);
                         }
                         return $facebookAPI;    // This needs to return even if we haven't set the user token yet, for the auth callback
                     }
@@ -314,10 +387,10 @@
              */
             function hasFacebook()
             {
-                if (!\Idno\Core\site()->session()->currentUser()) {
+                if (!Idno::site()->session()->currentUser()) {
                     return false;
                 }
-                return \Idno\Core\site()->session()->currentUser()->facebook;
+                return Idno::site()->session()->currentUser()->facebook;
             }
 
         }
