@@ -18,20 +18,21 @@
                 if ($facebook = \Idno\Core\site()->plugins()->get('Facebook')) {
                     if ($facebookAPI = $facebook->connect()) {
                         /* @var \IdnoPlugins\Facebook\FacebookAPI $facebookAPI */
-                        if ($session = $facebookAPI->getSessionOnLogin()) {
+                        if ($access_obj = $facebookAPI->getTokenOnLogin()) {
                             $user = \Idno\Core\site()->session()->currentUser();
-                            $access_token = $session->getToken();
                             $expires = 0;
-                            if ($access_obj = $session->getAccessToken()) {
-                                if ($expires = $access_obj->getExpiresAt()) {
-                                    $expires = $expires->getTimestamp();
-                                }
+                            if ($expires = $access_obj->getExpiresAt()) {
+                                $expires = $expires->getTimestamp();
                             }
-                            $facebookAPI->setAccessToken($access_token);
+                            $facebookAPI->setAccessToken($access_obj);
+
+                            $client = $facebookAPI->session->getOAuth2Client();
+                            $access_token = $client->getLongLivedAccessToken($access_obj);
+
                             if ($person = $facebookAPI->api('/me','GET')) {
-                                $name = $person['response']->getProperty('name');
-                                $id = $person['response']->getProperty('id');
-                                $user->facebook[$id] = ['id' => $id, 'access_token' => $access_token, 'name' => $name, 'expires' => $expires];
+                                $name = $person['response']->getField('name');
+                                $id = $person['response']->getField('id');
+                                $user->facebook[$id] = ['id' => $id, 'access_token' => ((string) $access_token), 'name' => $name, 'expires' => $expires];
                                 \Idno\Core\site()->syndication()->registerServiceAccount('facebook', $id, $name);
                                 if (\Idno\Core\site()->config()->multipleSyndicationAccounts()) {
                                     if ($companies = $facebookAPI->api('/me/accounts','GET')) {

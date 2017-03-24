@@ -11,16 +11,28 @@
 
         class FacebookAPI {
 
-            public $session = false;
+            public $session = false; /* @var \Facebook\Facebook $session */
+
+            function __construct()
+            {
+                $fb = new \Facebook\Facebook([
+                    'app_id'     => \Idno\Core\Idno::site()->config()->facebook['appId'],
+                    'app_secret' => \Idno\Core\Idno::site()->config()->facebook['secret'],
+                    'default_graph_version' => 'v2.4',
+                ]);
+                $this->session = $fb;
+            }
 
             function setAccessToken($token)
             {
-
                 try {
-                    $session = new \Facebook\FacebookSession($token);
+                    $session = $this->session;
+                    $session->setDefaultAccessToken($token);
                     $this->session = $session;
                     return $session;
                 } catch (\Exception $e) {
+                    var_export($token);
+                    echo $e->getMessage(); exit;
                     \Idno\Core\site()->session()->addMessage("Your Facebook session seems to have expired. You need to <a href=\"".\Idno\Core\site()->config()->getDisplayURL()."account/facebook/\">re-authenticate</a>.");
                 }
                 return false;
@@ -36,20 +48,22 @@
 
                 $redirect_url = \Idno\Core\site()->config()->getDisplayURL() . 'facebook/callback';
 
-                $helper = new Facebook\FacebookRedirectLoginHelper($redirect_url);
-                return $helper->getLoginUrl(['public_profile','email','manage_pages','publish_actions', 'rsvp_event']);
+                $session = $this->session; /* @var \Facebook\Facebook $session */
+                $helper = $session->getRedirectLoginHelper();
+                return $helper->getLoginUrl($redirect_url, ['public_profile','email','manage_pages','publish_actions', 'rsvp_event']);
 
             }
 
             /**
-             * Get the Facebook session on redirect
-             * @return bool|Facebook\FacebookSession
+             * Get the Facebook access token on redirect
+             * @return
              */
-            function getSessionOnLogin() {
+            function getTokenOnLogin() {
 
-                $helper = new Facebook\FacebookRedirectLoginHelper(\Idno\Core\site()->config()->getDisplayURL() . 'facebook/callback');
+                $session = $this->session; /* @var \Facebook\Facebook $session */
+                $helper = $session->getRedirectLoginHelper();
                 try {
-                    return $helper->getSessionFromRedirect();
+                    return $helper->getAccessToken();
                 } catch (\Exception $e) {
                     return false;
                 }
@@ -69,9 +83,13 @@
                     return false;
                 }
                 try {
-                    $response = (new Facebook\FacebookRequest($this->session, $verb, $endpoint, $params))->execute()->getGraphObject();
-                    $result = array('id' => $response->getProperty('id'), 'response' => $response);
-                    return $result;
+                    $verb_function = strtolower($verb);
+                    $session = $this->session;
+                    $response = $session->$verb_function($endpoint, $params); /* @var \Facebook\FacebookResponse $response */
+                    if ($items = $response->getGraphNode()) {
+                        $result = array('id' => $items->getField('id'), 'response' => $items);
+                        return $result;
+                    }
                 } catch (\Exception $e) {
                     \Idno\Core\site()->logging()->log($e->getMessage());
                     return false;

@@ -32,7 +32,7 @@
                         </div>
                     </div>
                 </div>
-            <?php
+                <?php
 
             } else {
 
@@ -42,19 +42,19 @@
                         <div class="row">
                             <div class="col-md-7">
                                 <p>
-                                    Your account is currently connected to Facebook. 
+                                    Your account is currently connected to Facebook.
                                     Public updates, pictures, and posts that you publish
                                     here can be cross-posted to Facebook.
- 
+
                                 </p>
 
-                        <?php
+                                <?php
 
-                            if ($accounts = \Idno\Core\site()->syndication()->getServiceAccounts('facebook')) {
+                                    if ($accounts = \Idno\Core\site()->syndication()->getServiceAccounts('facebook')) {
 
-                                foreach ($accounts as $id => $account) {
+                                    foreach ($accounts as $id => $account) {
 
-                                    ?>
+                                ?>
                                 <div class="social">
                                     <form action="<?= \Idno\Core\site()->config()->getDisplayURL() ?>facebook/deauth"
                                           class="form-horizontal" method="post">
@@ -62,18 +62,18 @@
                                             <input type="hidden" name="remove" value="<?= $account['username'] ?>"/>
                                             <button type="submit"
                                                     class="connect fb connected"><i class="fa fa-facebook"></i>
- <?= $account['name'] ?> (Disconnect)
+                                                <?= $account['name'] ?> (Disconnect)
                                             </button>
                                             <?= \Idno\Core\site()->actions()->signForm('/account/facebook/') ?>
                                         </p>
                                     </form>
-                                <?php
+                                    <?php
 
-                                }
+                                        }
 
-                            } else {
+                                        } else {
 
-                                ?>
+                                    ?>
                                 </div>
 
                                 <div class="social">
@@ -82,30 +82,31 @@
                                         <p>
                                             <input type="hidden" name="remove" value="1"/>
                                             <button type="submit" class="connect fb connected">
-                                            <i class="fa fa-facebook"></i>
- Disconnect Facebook
+                                                <i class="fa fa-facebook"></i>
+                                                Disconnect Facebook
                                             </button>
                                             <?= \Idno\Core\site()->actions()->signForm('/account/facebook/') ?>
                                         </p>
                                     </form>
 
-                            <?php
+                                    <?php
 
-                            }
+                                        }
 
-                        ?>
-                    			</div>
+                                    ?>
+                                </div>
 
-								<p>
-								<a href="<?= $vars['login_url'] ?>" ><i class="fa fa-plus"></i> Add another Facebook account</a>
-                    			</p>
-                    		</div>
-                </div>
-               
+                                <p>
+                                    <a href="<?= $vars['login_url'] ?>"><i class="fa fa-plus"></i> Add another Facebook
+                                        account</a>
+                                </p>
+                            </div>
+                        </div>
+
 
                     </div>
                 </div>
-            <?php
+                <?php
 
             }
         ?>

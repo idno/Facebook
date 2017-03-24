@@ -337,11 +337,7 @@
             {
                 if (!empty(Idno::site()->config()->facebook)) {
 
-                    require_once(dirname(__FILE__) . '/external/facebook-sdk/autoload.php');
-                    \Facebook\FacebookSession::setDefaultApplication(
-                        Idno::site()->config()->facebook['appId'],
-                        Idno::site()->config()->facebook['secret']
-                    );
+                    require_once(dirname(__FILE__) . '/external/facebook-sdk/src/Facebook/autoload.php');
 
                     $facebookAPI = new FacebookAPI();
                     if (!empty($account_id)) {

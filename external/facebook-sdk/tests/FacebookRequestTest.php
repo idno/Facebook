@@ -1,140 +1,207 @@
 <?php
+/**
+ * Copyright 2014 Facebook, Inc.
+ *
+ * You are hereby granted a non-exclusive, worldwide, royalty-free license to
+ * use, copy, modify, and distribute this software in source code or binary
+ * form for use in connection with the web services and APIs provided by
+ * Facebook.
+ *
+ * As with any software that integrates with the Facebook platform, your use
+ * of this software is subject to the Facebook Developer Principles and
+ * Policies [http://developers.facebook.com/policy/]. This copyright notice
+ * shall be included in all copies or substantial portions of the software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ *
+ */
+namespace Facebook\Tests;
 
+use Facebook\Facebook;
+use Facebook\FacebookApp;
 use Facebook\FacebookRequest;
-use Facebook\FacebookSession;
+use Facebook\FileUpload\FacebookFile;
+use Facebook\FileUpload\FacebookVideo;
 
-class FacebookRequestTest extends PHPUnit_Framework_TestCase
+class FacebookRequestTest extends \PHPUnit_Framework_TestCase
 {
+    public function testAnEmptyRequestEntityCanInstantiate()
+    {
+        $app = new FacebookApp('123', 'foo_secret');
+        $request = new FacebookRequest($app);
 
-  public function testGetsTheLoggedInUsersProfile()
-  {
-    $response = (
-      new FacebookRequest(
-        FacebookTestHelper::$testSession,
-        'GET',
-        '/me'
-      ))->execute()->getGraphObject();
-    $this->assertNotNull($response->getProperty('id'));
-    $this->assertNotNull($response->getProperty('name'));
-  }
+        $this->assertInstanceOf('Facebook\FacebookRequest', $request);
+    }
 
-  public function testCanPostAndDelete()
-  {
-    // Create a test user
-    $params = array(
-      'name' => 'Foo User',
-    );
-    $response = (
-      new FacebookRequest(
-        new FacebookSession(FacebookTestHelper::getAppToken()),
-        'POST',
-        '/' . FacebookTestCredentials::$appId . '/accounts/test-users',
-        $params
-      ))->execute()->getGraphObject();
-    $user_id = $response->getProperty('id');
-    $this->assertNotNull($user_id);
+    /**
+     * @expectedException \Facebook\Exceptions\FacebookSDKException
+     */
+    public function testAMissingAccessTokenWillThrow()
+    {
+        $app = new FacebookApp('123', 'foo_secret');
+        $request = new FacebookRequest($app);
 
-    // Delete test user
-    $response = (
-    new FacebookRequest(
-      new FacebookSession(FacebookTestHelper::getAppToken()),
-      'DELETE',
-      '/' . $user_id
-    ))->execute()->getGraphObject()->asArray();
-    $this->assertTrue($response);
-  }
+        $request->validateAccessToken();
+    }
 
-  public function testETagHit()
-  {
-    $response = (
-    new FacebookRequest(
-      FacebookTestHelper::$testSession,
-      'GET',
-      '/104048449631599'
-    ))->execute();
+    /**
+     * @expectedException \Facebook\Exceptions\FacebookSDKException
+     */
+    public function testAMissingMethodWillThrow()
+    {
+        $app = new FacebookApp('123', 'foo_secret');
+        $request = new FacebookRequest($app);
 
-    $response = (
-    new FacebookRequest(
-      FacebookTestHelper::$testSession,
-      'GET',
-      '/104048449631599',
-      null,
-      null,
-      $response->getETag()
-    ))->execute();
+        $request->validateMethod();
+    }
 
-    $this->assertTrue($response->isETagHit());
-    $this->assertNull($response->getETag());
-  }
+    /**
+     * @expectedException \Facebook\Exceptions\FacebookSDKException
+     */
+    public function testAnInvalidMethodWillThrow()
+    {
+        $app = new FacebookApp('123', 'foo_secret');
+        $request = new FacebookRequest($app, 'foo_token', 'FOO');
 
-  public function testETagMiss()
-  {
-    $response = (
-    new FacebookRequest(
-      FacebookTestHelper::$testSession,
-      'GET',
-      '/104048449631599',
-      null,
-      null,
-      'someRandomValue'
-    ))->execute();
+        $request->validateMethod();
+    }
 
-    $this->assertFalse($response->isETagHit());
-    $this->assertNotNull($response->getETag());
-  }
+    public function testGetHeadersWillAutoAppendETag()
+    {
+        $app = new FacebookApp('123', 'foo_secret');
+        $request = new FacebookRequest($app, null, 'GET', '/foo', [], 'fooETag');
 
-  public function testGracefullyHandlesUrlAppending()
-  {
-    $params = array();
-    $url = 'https://www.foo.com/';
-    $processed_url = FacebookRequest::appendParamsToUrl($url, $params);
-    $this->assertEquals('https://www.foo.com/', $processed_url);
+        $headers = $request->getHeaders();
 
-    $params = array(
-      'access_token' => 'foo',
-    );
-    $url = 'https://www.foo.com/';
-    $processed_url = FacebookRequest::appendParamsToUrl($url, $params);
-    $this->assertEquals('https://www.foo.com/?access_token=foo', $processed_url);
+        $expectedHeaders = FacebookRequest::getDefaultHeaders();
+        $expectedHeaders['If-None-Match'] = 'fooETag';
 
-    $params = array(
-      'access_token' => 'foo',
-      'bar' => 'baz',
-    );
-    $url = 'https://www.foo.com/?foo=bar';
-    $processed_url = FacebookRequest::appendParamsToUrl($url, $params);
-    $this->assertEquals('https://www.foo.com/?access_token=foo&bar=baz&foo=bar', $processed_url);
+        $this->assertEquals($expectedHeaders, $headers);
+    }
 
-    $params = array(
-      'access_token' => 'foo',
-    );
-    $url = 'https://www.foo.com/?foo=bar&access_token=bar';
-    $processed_url = FacebookRequest::appendParamsToUrl($url, $params);
-    $this->assertEquals('https://www.foo.com/?access_token=bar&foo=bar', $processed_url);
-  }
+    public function testGetParamsWillAutoAppendAccessTokenAndAppSecretProof()
+    {
+        $app = new FacebookApp('123', 'foo_secret');
+        $request = new FacebookRequest($app, 'foo_token', 'POST', '/foo', ['foo' => 'bar']);
 
-  public function testAppSecretProof()
-  {
-    $enableAppSecretProof = FacebookSession::useAppSecretProof();
+        $params = $request->getParams();
 
-    FacebookSession::enableAppSecretProof(true);
-    $request = new FacebookRequest(
-      FacebookTestHelper::$testSession,
-      'GET',
-      '/me'
-    );
-    $this->assertTrue(isset($request->getParameters()['appsecret_proof']));
+        $this->assertEquals([
+            'foo' => 'bar',
+            'access_token' => 'foo_token',
+            'appsecret_proof' => 'df4256903ba4e23636cc142117aa632133d75c642bd2a68955be1443bd14deb9',
+        ], $params);
+    }
 
+    public function testAnAccessTokenCanBeSetFromTheParams()
+    {
+        $app = new FacebookApp('123', 'foo_secret');
+        $request = new FacebookRequest($app, null, 'POST', '/me', ['access_token' => 'bar_token']);
 
-    FacebookSession::enableAppSecretProof(false);
-    $request = new FacebookRequest(
-      FacebookTestHelper::$testSession,
-      'GET',
-      '/me'
-    );
-    $this->assertFalse(isset($request->getParameters()['appsecret_proof']));
+        $accessToken = $request->getAccessToken();
 
-    FacebookSession::enableAppSecretProof($enableAppSecretProof);
-  }
+        $this->assertEquals('bar_token', $accessToken);
+    }
 
+    /**
+     * @expectedException \Facebook\Exceptions\FacebookSDKException
+     */
+    public function testAccessTokenConflictsWillThrow()
+    {
+        $app = new FacebookApp('123', 'foo_secret');
+        new FacebookRequest($app, 'foo_token', 'POST', '/me', ['access_token' => 'bar_token']);
+    }
+
+    public function testAProperUrlWillBeGenerated()
+    {
+        $app = new FacebookApp('123', 'foo_secret');
+        $getRequest = new FacebookRequest($app, 'foo_token', 'GET', '/foo', ['foo' => 'bar']);
+
+        $getUrl = $getRequest->getUrl();
+        $expectedParams = 'foo=bar&access_token=foo_token&appsecret_proof=df4256903ba4e23636cc142117aa632133d75c642bd2a68955be1443bd14deb9';
+        $expectedUrl = '/' . Facebook::DEFAULT_GRAPH_VERSION . '/foo?' . $expectedParams;
+
+        $this->assertEquals($expectedUrl, $getUrl);
+
+        $postRequest = new FacebookRequest($app, 'foo_token', 'POST', '/bar', ['foo' => 'bar']);
+
+        $postUrl = $postRequest->getUrl();
+        $expectedUrl = '/' . Facebook::DEFAULT_GRAPH_VERSION . '/bar';
+
+        $this->assertEquals($expectedUrl, $postUrl);
+    }
+
+    public function testAuthenticationParamsAreStrippedAndReapplied()
+    {
+        $app = new FacebookApp('123', 'foo_secret');
+
+        $request = new FacebookRequest(
+            $app,
+            $accessToken = 'foo_token',
+            $method = 'GET',
+            $endpoint = '/foo',
+            $params = [
+                'access_token' => 'foo_token',
+                'appsecret_proof' => 'bar_app_secret',
+                'bar' => 'baz',
+            ]
+        );
+
+        $url = $request->getUrl();
+
+        $expectedParams = 'bar=baz&access_token=foo_token&appsecret_proof=df4256903ba4e23636cc142117aa632133d75c642bd2a68955be1443bd14deb9';
+        $expectedUrl = '/' . Facebook::DEFAULT_GRAPH_VERSION . '/foo?' . $expectedParams;
+        $this->assertEquals($expectedUrl, $url);
+
+        $params = $request->getParams();
+
+        $expectedParams = [
+            'access_token' => 'foo_token',
+            'appsecret_proof' => 'df4256903ba4e23636cc142117aa632133d75c642bd2a68955be1443bd14deb9',
+            'bar' => 'baz',
+        ];
+        $this->assertEquals($expectedParams, $params);
+    }
+
+    public function testAFileCanBeAddedToParams()
+    {
+        $myFile = new FacebookFile(__DIR__ . '/foo.txt');
+        $params = [
+            'name' => 'Foo Bar',
+            'source' => $myFile,
+        ];
+        $app = new FacebookApp('123', 'foo_secret');
+        $request = new FacebookRequest($app, 'foo_token', 'POST', '/foo/photos', $params);
+
+        $actualParams = $request->getParams();
+
+        $this->assertTrue($request->containsFileUploads());
+        $this->assertFalse($request->containsVideoUploads());
+        $this->assertTrue(!isset($actualParams['source']));
+        $this->assertEquals('Foo Bar', $actualParams['name']);
+    }
+
+    public function testAVideoCanBeAddedToParams()
+    {
+        $myFile = new FacebookVideo(__DIR__ . '/foo.txt');
+        $params = [
+            'name' => 'Foo Bar',
+            'source' => $myFile,
+        ];
+        $app = new FacebookApp('123', 'foo_secret');
+        $request = new FacebookRequest($app, 'foo_token', 'POST', '/foo/videos', $params);
+
+        $actualParams = $request->getParams();
+
+        $this->assertTrue($request->containsFileUploads());
+        $this->assertTrue($request->containsVideoUploads());
+        $this->assertTrue(!isset($actualParams['source']));
+        $this->assertEquals('Foo Bar', $actualParams['name']);
+    }
 }
