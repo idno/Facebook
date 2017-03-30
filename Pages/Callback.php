@@ -35,6 +35,9 @@
                                 $user->facebook[$id] = ['id' => $id, 'access_token' => ((string) $access_token), 'name' => $name, 'expires' => $expires];
                                 \Idno\Core\site()->syndication()->registerServiceAccount('facebook', $id, $name);
                                 if (\Idno\Core\site()->config()->multipleSyndicationAccounts()) {
+				    
+				    \Idno\Core\site()->logging()->debug("Multiple syndication activated, looking for more accounts");
+				    
                                     if ($companies = $facebookAPI->api('/me/accounts','GET')) {
                                         if (!empty($companies['response'])) {
                                             foreach($companies['response']->asArray() as $company_container) {
