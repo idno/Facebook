@@ -324,7 +324,11 @@
             {
                 $facebook = $this;
                 if ($facebookAPI = $facebook->connect()) {
-                    return $facebookAPI->getLoginUrl();
+                    //return $facebookAPI->getLoginUrl();
+		    $helper = $facebook->getRedirectLoginHelper();
+
+		    $permissions = ['manage_pages', 'publish_pages']; // Optional permissions
+		    return $helper->getLoginUrl(\Idno\Core\Idno::site()->config()->getDisplayURL() . 'facebook/callback', $permissions);
                 }
                 return '';
             }
