@@ -324,11 +324,8 @@
             {
                 $facebook = $this;
                 if ($facebookAPI = $facebook->connect()) {
-                    //return $facebookAPI->getLoginUrl();
-		    
-		    $permissions = ['manage_pages', 'publish_pages']; // Optional permissions
-		    
-		    return $facebookAPI->getLoginUrl($permissions);
+                    
+		    return $facebookAPI->getLoginUrl();
                 }
                 return '';
             }
