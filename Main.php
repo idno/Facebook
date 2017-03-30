@@ -324,7 +324,8 @@
             {
                 $facebook = $this;
                 if ($facebookAPI = $facebook->connect()) {
-                    return $facebookAPI->getLoginUrl();
+                    
+		    return $facebookAPI->getLoginUrl();
                 }
                 return '';
             }
