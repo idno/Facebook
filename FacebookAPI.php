@@ -86,12 +86,22 @@
                     $verb_function = strtolower($verb);
                     $session = $this->session;
                     $response = $session->$verb_function($endpoint, $params); /* @var \Facebook\FacebookResponse $response */
-                    if ($items = $response->getGraphNode()) {
-                        $result = array('id' => $items->getField('id'), 'response' => $items);
-                        return $result;
-                    }
+		    
+		    try {
+			if ($items = $response->getGraphNode()) {
+			    $result = array('id' => $items->getField('id'), 'response' => $items);
+			    return $result;
+			}
+		    } catch (\Exception $e) {
+			
+			// Ok, lets see if its a graph edge before we ditch
+			if ($items = $response->getGraphEdge()) {
+			    $result = array('id' => $items->getField('id'), 'response' => $items);
+			    return $result;
+			}
+		    }
                 } catch (\Exception $e) {
-                    \Idno\Core\site()->logging()->log($e->getMessage());
+                    \Idno\Core\site()->logging()->error($e->getMessage());
                     return false;
                 }
 
