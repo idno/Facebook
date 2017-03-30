@@ -326,7 +326,7 @@
                 if ($facebookAPI = $facebook->connect()) {
                     //return $facebookAPI->getLoginUrl();
 		    
-		    return $helper->getLoginUrl($permissions);
+		    return $facebookAPI->getLoginUrl($permissions);
                 }
                 return '';
             }
