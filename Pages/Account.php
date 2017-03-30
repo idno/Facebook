@@ -16,7 +16,12 @@
             {
                 $this->gatekeeper(); // Logged-in users only
                 if ($facebook = \Idno\Core\site()->plugins()->get('Facebook')) {
-                    $login_url = $facebook->getAuthURL();
+		    
+                    //$login_url = $facebook->getAuthURL();
+		    $helper = $facebook->getRedirectLoginHelper();
+
+		    $permissions = ['manage_pages', 'publish_pages']; // Optional permissions
+		    $login_url = $helper->getLoginUrl(\Idno\Core\Idno::site()->config()->getDisplayURL() . 'facebook/callback', $permissions);
                 }
                 $t = \Idno\Core\site()->template();
                 $body = $t->__(array('login_url' => $login_url))->draw('account/facebook');
