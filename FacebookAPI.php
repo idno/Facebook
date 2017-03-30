@@ -50,7 +50,7 @@
 
                 $session = $this->session; /* @var \Facebook\Facebook $session */
                 $helper = $session->getRedirectLoginHelper();
-                return $helper->getLoginUrl($redirect_url, ['public_profile','email','manage_pages','publish_actions', 'rsvp_event']);
+                return $helper->getLoginUrl($redirect_url, ['publish_pages', 'public_profile','email','manage_pages','publish_actions', 'rsvp_event']);
 
             }
 
