@@ -40,8 +40,8 @@
 				    
                                     if ($companies = $facebookAPI->api('/me/accounts','GET')) {
                                         if (!empty($companies['response'])) {
-                                            foreach($companies['response']->asArray() as $company_container) {
-                                                foreach($company_container as $company) {
+                                            foreach($companies['response']->asArray() as $company) {
+                                                //foreach($company_container as $company) {
                                                     $company = (array) $company;
                                                     if ($perms = $company['perms']) {
                                                         if (in_array('CREATE_CONTENT', $perms) && !empty($company['name'])) {
@@ -52,7 +52,7 @@
                                                             \Idno\Core\site()->syndication()->registerServiceAccount('facebook', $id, $name);
                                                         }
                                                     }
-                                                }
+                                                //}
                                             }
                                         }
                                     }
