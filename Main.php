@@ -136,35 +136,37 @@
                 // Push RSVPs to Facebook
                 Idno::site()->addEventHook('post/rsvp/facebook', function (\Idno\Core\Event $event) {
                     Idno::site()->logging()->debug("publishing RSVP to Facebook");
+			
+                    $eventdata = $event->data();
+                    if ($this->hasFacebook()) {
+                        $object      = $eventdata['object'];
+                        $facebookAPI = $this->getFacebookAPI($eventdata['syndication_account']);
+                        $name        = $this->getDisplayName($eventdata['syndication_account']);
+                        if (!empty($facebookAPI)) {
 
-                    $eventdata   = $event->data();
-                    $object      = $eventdata['object'];
-                    $facebookAPI = $this->getFacebookAPI($eventdata['syndication_account']);
-                    $name        = $this->getDisplayName($eventdata['syndication_account']);
-                    if ($facebookAPI) {
+                            $eventRegex = '#https?://(?:www\.|m\.)?facebook.com/events/(\d+)/?#';
+                            $eventUrl   = $this->possePostDiscovery($object->inreplyto, $eventRegex);
 
-                        $eventRegex = '#https?://(?:www\.|m\.)?facebook.com/events/(\d+)/?#';
-                        $eventUrl   = $this->possePostDiscovery($object->inreplyto, $eventRegex);
+                            if ($eventUrl && preg_match($eventRegex, $eventUrl, $matches)) {
+                                $eventId = $matches[1];
 
-                        if ($eventUrl && preg_match($eventRegex, $eventUrl, $matches)) {
-                            $eventId = $matches[1];
+                                $endpoint = false;
+                                if ($object->rsvp === 'yes') {
+                                    $endpoint = "/$eventId/attending";
+                                } else if ($object->rsvp === 'no') {
+                                    $endpoint = "/$eventId/declined";
+                                } else if ($object->rsvp === 'maybe') {
+                                    $endpoint = "/$eventId/maybe";
+                                }
 
-                            $endpoint = false;
-                            if ($object->rsvp === 'yes') {
-                                $endpoint = "/$eventId/attending";
-                            } else if ($object->rsvp === 'no') {
-                                $endpoint = "/$eventId/declined";
-                            } else if ($object->rsvp === 'maybe') {
-                                $endpoint = "/$eventId/maybe";
-                            }
-
-                            if ($endpoint) {
-                                Idno::site()->logging()->debug("publishing rsvp to Facebook on $endpoint");
-                                $response = $facebookAPI->api($endpoint, 'POST');
-                                Idno::site()->logging()->debug("publish response from Facebook", ['response' => $response]);
+                                if ($endpoint) {
+                                    Idno::site()->logging()->debug("publishing rsvp to Facebook on $endpoint");
+                                    $response = $facebookAPI->api($endpoint, 'POST');
+                                    Idno::site()->logging()->debug("publish response from Facebook", ['response' => $response]);
+                                }
                             }
                         }
-                    }
+		    }
                 });
 
                 // Push "media" to Facebook
@@ -379,7 +381,7 @@
             }
 
             /**
-             * Can the current user use Twitter?
+             * Can the current user use Facebook?
              * @return bool
              */
             function hasFacebook()
