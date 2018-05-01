@@ -18,7 +18,7 @@
                 $fb = new \Facebook\Facebook([
                     'app_id'     => \Idno\Core\Idno::site()->config()->facebook['appId'],
                     'app_secret' => \Idno\Core\Idno::site()->config()->facebook['secret'],
-                    'default_graph_version' => 'v2.4',
+                    'default_graph_version' => 'v2.6',
                 ]);
                 $this->session = $fb;
             }
