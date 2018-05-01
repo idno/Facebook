@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2017 Facebook, Inc.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to
  * use, copy, modify, and distribute this software in source code or binary
@@ -42,7 +42,7 @@ class FacebookGuzzleHttpClientTest extends AbstractTestHttpClient
      */
     protected $guzzleClient;
 
-    public function setUp()
+    protected function setUp()
     {
         $this->guzzleMock = m::mock('GuzzleHttp\Client');
         $this->guzzleClient = new FacebookGuzzleHttpClient($this->guzzleMock);

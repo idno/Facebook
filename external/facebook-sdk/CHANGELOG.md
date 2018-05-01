@@ -2,12 +2,52 @@
 
 Starting with version 5, the Facebook PHP SDK follows [SemVer](http://semver.org/).
 
-
-## 5.0.x
+## 5.x
 
 Version 5 of the Facebook PHP SDK is a complete refactor of version 4. It comes loaded with lots of new features and a friendlier API.
 
-- 5.0 (2015-??-??)
+- 5.6.2 (2018-02-15)
+  - Strip 'code' param (#913)
+- 5.6.1 (2017-08-16)
+  - Fixed doc block syntax that interfered with Doctrine (#844)
+- 5.6.0 (2017-07-23)
+  - Bump Graph API version to v2.10 (#829)
+- 5.5.0 (2017-04-20)
+  - Added support for batch options (#713)
+  - Bump Graph API version to v2.9.
+- 5.4.4 (2017-01-19)
+  - Added the `application/octet-stream` MIME type for SRT files (#734)
+- 5.4.3 (2016-12-30)
+  - Fixed a bug that would throw a type error in `GraphEdge` in some cases (#715)
+- 5.4.2 (2016-11-15)
+  - Added check for [PHP 7 CSPRNG](http://php.net/manual/en/function.random-bytes.php) first to keep mcrypt deprecation messages from appearing in PHP 7.1 (#692)
+- 5.4.1 (2016-10-18)
+  - Fixed a bug that was not properly parsing response headers when they contained the colon `:` character. (#679)
+- 5.4.0 (2016-10-12)
+  - Bump Graph API version to v2.8.
+  - Auto-cast `cover` field to `GraphCoverPhoto` and `picture` field to `GraphPicture` in `GraphPage`. (#655)
+  - Added `getCover()` and `getPicture()` to `GraphPage`. (#655)
+- 5.3.1
+  - Fixed a bug where the `polyfills.php` file wasn't being included properly when using the built-in auto loader (#633)
+- 5.3.0
+  - Bump Graph API version to v2.7.
+- 5.2.1
+  - Fix notice that is raised in `FacebookUrlDetectionHandler` (#626)
+  - Fix bug in `FacebookRedirectLoginHelper::getLoginUrl()` where the CSRF token gets overwritten in certain scenarios (#613)
+  - Fix bug with polyfills not getting loaded when installing the Facebook PHP SDK manually (#599)
+- 5.2.0
+  - Added new Birthday class to handle Graph API response variations
+  - Bumped Graph version to v2.6
+  - Added better error checking for app IDs that are cast as int when they are greater than PHP_INT_MAX
+- 5.1.5
+  - Removed mbstring extension dependency
+  - Updated required PHP version syntax in composer.json
+- 5.1.4
+  - Breaking changes
+    - Changes the serialization method of FacebookApp
+      - FacebookApps serialized by versions prior 5.1.4 cannot be unserialized by this version
+  - Fixed redirect_uri injection vulnerability
+- 5.0 (2015-07-09)
   - New features
     - Added the `Facebook\Facebook` super service for an easier API
     - Improved "reauthentication" and "rerequest" support
@@ -22,8 +62,8 @@ Version 5 of the Facebook PHP SDK is a complete refactor of version 4. It comes 
       - Many improvements to the Graph node subtypes
     - New injectable interfaces
       - Added a `PersistentDataInterface` for custom persistent data handling
-      - Added a `PseudoRandomStringGeneratorInterface` for customizable CSPRNG's 
-      - Added a `UrlDetectionInterface` for custom URL-detection logic 
+      - Added a `PseudoRandomStringGeneratorInterface` for customizable CSPRNG's
+      - Added a `UrlDetectionInterface` for custom URL-detection logic
   - Codebase changes
     - Moved exception classes to `Exception\*` directory
     - Moved response collection objects to `GraphNodes\*` directory
@@ -34,6 +74,7 @@ Version 5 of the Facebook PHP SDK is a complete refactor of version 4. It comes 
     - Renamed `FacebookHttpable` to `FacebookHttpClientInterface`
     - Added `FacebookApp` entity that contains info about the Facebook app
     - Updated the API for the helpers
+    - Added `HttpClients`, `PersistentData` and `PseudoRandomString` factories to reduce main class' complexity
   - Tests
     - Added namespaces to the tests
     - Grouped functional tests under `functional` group
@@ -45,11 +86,9 @@ Version 5 of the Facebook PHP SDK is a complete refactor of version 4. It comes 
     - Added `ext-mbstring` to composer require
     - Added this CHANGELOG. Hi! :)
 
-
 ## 4.1-dev
 
 Since the Facebook PHP SDK didn't follow SemVer in version 4.x, the master branch was going to be released as 4.1. However, the SDK switched to SemVer in v5.0. So any references on the internet to version 4.1 can be assumed to be an alias to version `5.0.0`
-
 
 ## 4.0.x
 

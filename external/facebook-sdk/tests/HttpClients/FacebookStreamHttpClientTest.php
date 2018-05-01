@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2017 Facebook, Inc.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to
  * use, copy, modify, and distribute this software in source code or binary
@@ -38,7 +38,7 @@ class FacebookStreamHttpClientTest extends AbstractTestHttpClient
      */
     protected $streamClient;
 
-    public function setUp()
+    protected function setUp()
     {
         $this->streamMock = m::mock('Facebook\HttpClients\FacebookStream');
         $this->streamClient = new FacebookStreamHttpClient($this->streamMock);

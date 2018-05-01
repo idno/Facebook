@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2017 Facebook, Inc.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to
  * use, copy, modify, and distribute this software in source code or binary
@@ -26,6 +26,7 @@ namespace Facebook\Tests\GraphNodes;
 use Facebook\FacebookApp;
 use Facebook\FacebookRequest;
 use Facebook\GraphNodes\GraphEdge;
+use Facebook\GraphNodes\GraphNode;
 
 class GraphEdgeTest extends \PHPUnit_Framework_TestCase
 {
@@ -35,18 +36,12 @@ class GraphEdgeTest extends \PHPUnit_Framework_TestCase
      */
     protected $request;
 
-    protected $basePagination = [
+    protected $pagination = [
         'next' => 'https://graph.facebook.com/v7.12/998899/photos?pretty=0&limit=25&after=foo_after_cursor',
         'previous' => 'https://graph.facebook.com/v7.12/998899/photos?pretty=0&limit=25&before=foo_before_cursor',
     ];
-    protected $cursorPagination = [
-        'cursors' => [
-            'after' => 'bar_after_cursor',
-            'before' => 'bar_before_cursor',
-        ],
-    ];
 
-    public function setUp()
+    protected function setUp()
     {
         $app = new FacebookApp('123', 'foo_app_secret');
         $this->request = new FacebookRequest(
@@ -75,7 +70,7 @@ class GraphEdgeTest extends \PHPUnit_Framework_TestCase
         $graphEdge = new GraphEdge(
             $this->request,
             [],
-            ['paging' => $this->basePagination]
+            ['paging' => $this->pagination]
         );
         $nextPage = $graphEdge->getPaginationUrl('next');
         $prevPage = $graphEdge->getPaginationUrl('previous');
@@ -84,27 +79,12 @@ class GraphEdgeTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('/998899/photos?pretty=0&limit=25&before=foo_before_cursor', $prevPage);
     }
 
-    public function testCanGeneratePaginationEndpointsFromACursor()
-    {
-        $graphEdge = new GraphEdge(
-            $this->request,
-            [],
-            ['paging' => $this->cursorPagination],
-            '/1234567890/likes'
-        );
-        $nextPage = $graphEdge->getPaginationUrl('next');
-        $prevPage = $graphEdge->getPaginationUrl('previous');
-
-        $this->assertEquals('/1234567890/likes?access_token=foo_token&after=bar_after_cursor&appsecret_proof=857d5f035a894f16b4180f19966e055cdeab92d4d53017b13dccd6d43b6497af&foo=bar&keep=me', $nextPage);
-        $this->assertEquals('/1234567890/likes?access_token=foo_token&appsecret_proof=857d5f035a894f16b4180f19966e055cdeab92d4d53017b13dccd6d43b6497af&before=bar_before_cursor&foo=bar&keep=me', $prevPage);
-    }
-
     public function testCanInstantiateNewPaginationRequest()
     {
         $graphEdge = new GraphEdge(
             $this->request,
             [],
-            ['paging' => $this->cursorPagination],
+            ['paging' => $this->pagination],
             '/1234567890/likes'
         );
         $nextPage = $graphEdge->getNextPageRequest();
@@ -114,7 +94,37 @@ class GraphEdgeTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Facebook\FacebookRequest', $prevPage);
         $this->assertNotSame($this->request, $nextPage);
         $this->assertNotSame($this->request, $prevPage);
-        $this->assertEquals('/v1337/1234567890/likes?access_token=foo_token&after=bar_after_cursor&appsecret_proof=857d5f035a894f16b4180f19966e055cdeab92d4d53017b13dccd6d43b6497af&foo=bar&keep=me', $nextPage->getUrl());
-        $this->assertEquals('/v1337/1234567890/likes?access_token=foo_token&appsecret_proof=857d5f035a894f16b4180f19966e055cdeab92d4d53017b13dccd6d43b6497af&before=bar_before_cursor&foo=bar&keep=me', $prevPage->getUrl());
+        $this->assertEquals('/v1337/998899/photos?access_token=foo_token&after=foo_after_cursor&appsecret_proof=857d5f035a894f16b4180f19966e055cdeab92d4d53017b13dccd6d43b6497af&foo=bar&limit=25&pretty=0', $nextPage->getUrl());
+        $this->assertEquals('/v1337/998899/photos?access_token=foo_token&appsecret_proof=857d5f035a894f16b4180f19966e055cdeab92d4d53017b13dccd6d43b6497af&before=foo_before_cursor&foo=bar&limit=25&pretty=0', $prevPage->getUrl());
+    }
+
+    public function testCanMapOverNodes()
+    {
+        $graphEdge = new GraphEdge(
+            $this->request,
+            [
+                new GraphNode(['name' => 'dummy']),
+                new GraphNode(['name' => 'dummy']),
+            ],
+            ['paging' => $this->pagination],
+            '/1234567890/likes'
+        );
+
+        $graphEdge = $graphEdge->map(function (GraphNode $node) {
+            $node['name'] = str_replace('dummy', 'foo', $node['name']);
+            return $node;
+        });
+
+        $graphEdgeToCompare = new GraphEdge(
+            $this->request,
+            [
+                new GraphNode(['name' => 'foo']),
+                new GraphNode(['name' => 'foo'])
+            ],
+            ['paging' => $this->pagination],
+            '/1234567890/likes'
+        );
+
+        $this->assertEquals($graphEdgeToCompare, $graphEdge);
     }
 }

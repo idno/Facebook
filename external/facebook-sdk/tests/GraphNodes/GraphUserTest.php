@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2017 Facebook, Inc.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to
  * use, copy, modify, and distribute this software in source code or binary
@@ -34,7 +34,7 @@ class GraphUserTest extends \PHPUnit_Framework_TestCase
      */
     protected $responseMock;
 
-    public function setUp()
+    protected function setUp()
     {
         $this->responseMock = m::mock('\\Facebook\\FacebookResponse');
     }
@@ -42,7 +42,25 @@ class GraphUserTest extends \PHPUnit_Framework_TestCase
     public function testDatesGetCastToDateTime()
     {
         $dataFromGraph = [
-            'birthday' => '1984-01-01',
+            'updated_time' => '2016-04-26 13:22:05',
+        ];
+
+        $this->responseMock
+            ->shouldReceive('getDecodedBody')
+            ->once()
+            ->andReturn($dataFromGraph);
+        $factory = new GraphNodeFactory($this->responseMock);
+        $graphNode = $factory->makeGraphUser();
+
+        $updatedTime = $graphNode->getField('updated_time');
+
+        $this->assertInstanceOf('DateTime', $updatedTime);
+    }
+
+    public function testBirthdaysGetCastToBirthday()
+    {
+        $dataFromGraph = [
+            'birthday' => '1984/01/01',
         ];
 
         $this->responseMock
@@ -54,7 +72,53 @@ class GraphUserTest extends \PHPUnit_Framework_TestCase
 
         $birthday = $graphNode->getBirthday();
 
+        // Test to ensure BC
         $this->assertInstanceOf('DateTime', $birthday);
+
+        $this->assertInstanceOf('\\Facebook\\GraphNodes\\Birthday', $birthday);
+        $this->assertTrue($birthday->hasDate());
+        $this->assertTrue($birthday->hasYear());
+        $this->assertEquals('1984/01/01', $birthday->format('Y/m/d'));
+    }
+
+    public function testBirthdayCastHandlesDateWithoutYear()
+    {
+        $dataFromGraph = [
+            'birthday' => '03/21',
+        ];
+
+        $this->responseMock
+            ->shouldReceive('getDecodedBody')
+            ->once()
+            ->andReturn($dataFromGraph);
+        $factory = new GraphNodeFactory($this->responseMock);
+        $graphNode = $factory->makeGraphUser();
+
+        $birthday = $graphNode->getBirthday();
+
+        $this->assertTrue($birthday->hasDate());
+        $this->assertFalse($birthday->hasYear());
+        $this->assertEquals('03/21', $birthday->format('m/d'));
+    }
+
+    public function testBirthdayCastHandlesYearWithoutDate()
+    {
+        $dataFromGraph = [
+            'birthday' => '1984',
+        ];
+
+        $this->responseMock
+            ->shouldReceive('getDecodedBody')
+            ->once()
+            ->andReturn($dataFromGraph);
+        $factory = new GraphNodeFactory($this->responseMock);
+        $graphNode = $factory->makeGraphUser();
+
+        $birthday = $graphNode->getBirthday();
+
+        $this->assertTrue($birthday->hasYear());
+        $this->assertFalse($birthday->hasDate());
+        $this->assertEquals('1984', $birthday->format('Y'));
     }
 
     public function testPagePropertiesWillGetCastAsGraphPageObjects()

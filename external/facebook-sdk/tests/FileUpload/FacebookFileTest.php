@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2017 Facebook, Inc.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to
  * use, copy, modify, and distribute this software in source code or binary
@@ -27,10 +27,9 @@ use Facebook\FileUpload\FacebookFile;
 
 class FacebookFileTest extends \PHPUnit_Framework_TestCase
 {
-
     protected $testFile = '';
 
-    public function setUp()
+    protected function setUp()
     {
         $this->testFile = __DIR__ . '/../foo.txt';
     }
@@ -41,6 +40,14 @@ class FacebookFileTest extends \PHPUnit_Framework_TestCase
         $fileContents = $file->getContents();
 
         $this->assertEquals('This is a text file used for testing. Let\'s dance.', $fileContents);
+    }
+
+    public function testPartialFilesCanBeCreated()
+    {
+        $file = new FacebookFile($this->testFile, 14, 5);
+        $fileContents = $file->getContents();
+
+        $this->assertEquals('is a text file', $fileContents);
     }
 
     /**

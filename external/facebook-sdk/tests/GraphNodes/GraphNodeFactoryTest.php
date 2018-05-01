@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2017 Facebook, Inc.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to
  * use, copy, modify, and distribute this software in source code or binary
@@ -27,18 +27,6 @@ use Facebook\FacebookApp;
 use Facebook\FacebookRequest;
 use Facebook\FacebookResponse;
 use Facebook\GraphNodes\GraphNodeFactory;
-use Facebook\GraphNodes\GraphNode;
-
-class MyFooSubClassGraphNode extends GraphNode
-{
-}
-
-class MyFooGraphNode extends GraphNode
-{
-    protected static $graphObjectMap = [
-        'foo_object' => '\Facebook\Tests\GraphNodes\MyFooSubClassGraphNode',
-    ];
-}
 
 class GraphNodeFactoryTest extends \PHPUnit_Framework_TestCase
 {
@@ -47,7 +35,7 @@ class GraphNodeFactoryTest extends \PHPUnit_Framework_TestCase
      */
     protected $request;
 
-    public function setUp()
+    protected function setUp()
     {
         $app = new FacebookApp('123', 'foo_app_secret');
         $this->request = new FacebookRequest(
@@ -126,7 +114,7 @@ class GraphNodeFactoryTest extends \PHPUnit_Framework_TestCase
     {
         GraphNodeFactory::validateSubclass('\Facebook\GraphNodes\GraphNode');
         GraphNodeFactory::validateSubclass('\Facebook\GraphNodes\GraphAlbum');
-        GraphNodeFactory::validateSubclass('\Facebook\Tests\GraphNodes\MyFooGraphNode');
+        GraphNodeFactory::validateSubclass('\Facebook\Tests\Fixtures\MyFooGraphNode');
     }
 
     public function testCastingAsASubClassObjectWillInstantiateTheSubClass()
@@ -135,9 +123,9 @@ class GraphNodeFactoryTest extends \PHPUnit_Framework_TestCase
         $res = new FacebookResponse($this->request, $data);
 
         $factory = new GraphNodeFactory($res);
-        $mySubClassObject = $factory->makeGraphNode('\Facebook\Tests\GraphNodes\MyFooGraphNode');
+        $mySubClassObject = $factory->makeGraphNode('\Facebook\Tests\Fixtures\MyFooGraphNode');
 
-        $this->assertInstanceOf('\Facebook\Tests\GraphNodes\MyFooGraphNode', $mySubClassObject);
+        $this->assertInstanceOf('\Facebook\Tests\Fixtures\MyFooGraphNode', $mySubClassObject);
     }
 
     public function testASubClassMappingWillAutomaticallyInstantiateSubClass()
@@ -146,11 +134,11 @@ class GraphNodeFactoryTest extends \PHPUnit_Framework_TestCase
         $res = new FacebookResponse($this->request, $data);
 
         $factory = new GraphNodeFactory($res);
-        $mySubClassObject = $factory->makeGraphNode('\Facebook\Tests\GraphNodes\MyFooGraphNode');
+        $mySubClassObject = $factory->makeGraphNode('\Facebook\Tests\Fixtures\MyFooGraphNode');
         $fooObject = $mySubClassObject->getField('foo_object');
 
-        $this->assertInstanceOf('\Facebook\Tests\GraphNodes\MyFooGraphNode', $mySubClassObject);
-        $this->assertInstanceOf('\Facebook\Tests\GraphNodes\MyFooSubClassGraphNode', $fooObject);
+        $this->assertInstanceOf('\Facebook\Tests\Fixtures\MyFooGraphNode', $mySubClassObject);
+        $this->assertInstanceOf('\Facebook\Tests\Fixtures\MyFooSubClassGraphNode', $fooObject);
     }
 
     public function testAnUnknownGraphNodeWillBeCastAsAGenericGraphNode()
@@ -167,12 +155,12 @@ class GraphNodeFactoryTest extends \PHPUnit_Framework_TestCase
 
         $factory = new GraphNodeFactory($res);
 
-        $mySubClassObject = $factory->makeGraphNode('\Facebook\Tests\GraphNodes\MyFooGraphNode');
+        $mySubClassObject = $factory->makeGraphNode('\Facebook\Tests\Fixtures\MyFooGraphNode');
         $unknownObject = $mySubClassObject->getField('unknown_object');
 
-        $this->assertInstanceOf('\Facebook\Tests\GraphNodes\MyFooGraphNode', $mySubClassObject);
+        $this->assertInstanceOf('\Facebook\Tests\Fixtures\MyFooGraphNode', $mySubClassObject);
         $this->assertInstanceOf('\Facebook\GraphNodes\GraphNode', $unknownObject);
-        $this->assertNotInstanceOf('\Facebook\Tests\GraphNodes\MyFooGraphNode', $unknownObject);
+        $this->assertNotInstanceOf('\Facebook\Tests\Fixtures\MyFooGraphNode', $unknownObject);
     }
 
     public function testAListFromGraphWillBeCastAsAGraphEdge()

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2017 Facebook, Inc.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to
  * use, copy, modify, and distribute this software in source code or binary
@@ -24,31 +24,8 @@
 namespace Facebook\Tests\Helpers;
 
 use Facebook\FacebookApp;
-use Facebook\FacebookClient;
-use Facebook\FacebookRequest;
-use Facebook\FacebookResponse;
-use Facebook\Helpers\FacebookSignedRequestFromInputHelper;
-
-class FooSignedRequestHelper extends FacebookSignedRequestFromInputHelper
-{
-    public function getRawSignedRequest()
-    {
-        return null;
-    }
-}
-
-class FooSignedRequestHelperFacebookClient extends FacebookClient
-{
-    public function sendRequest(FacebookRequest $request)
-    {
-        $params = $request->getParams();
-        $rawResponse = json_encode([
-            'access_token' => 'foo_access_token_from:' . $params['code'],
-        ]);
-
-        return new FacebookResponse($request, $rawResponse, 200);
-    }
-}
+use Facebook\Tests\Fixtures\FooSignedRequestHelper;
+use Facebook\Tests\Fixtures\FooSignedRequestHelperFacebookClient;
 
 class FacebookSignedRequestFromInputHelperTest extends \PHPUnit_Framework_TestCase
 {
@@ -61,7 +38,7 @@ class FacebookSignedRequestFromInputHelperTest extends \PHPUnit_Framework_TestCa
     public $rawSignedRequestAuthorizedWithCode = 'oBtmZlsFguNQvGRETDYQQu1-PhwcArgbBBEK4urbpRA=.eyJjb2RlIjoiZm9vX2NvZGUiLCJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImlzc3VlZF9hdCI6MTQwNjMxMDc1MiwidXNlcl9pZCI6IjEyMyJ9';
     public $rawSignedRequestUnauthorized = 'KPlyhz-whtYAhHWr15N5TkbS_avz-2rUJFpFkfXKC88=.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImlzc3VlZF9hdCI6MTQwMjU1MTA4Nn0=';
 
-    public function setUp()
+    protected function setUp()
     {
         $app = new FacebookApp('123', 'foo_app_secret');
         $this->helper = new FooSignedRequestHelper($app, new FooSignedRequestHelperFacebookClient());

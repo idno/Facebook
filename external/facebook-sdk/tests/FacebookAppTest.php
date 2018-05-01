@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2017 Facebook, Inc.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to
  * use, copy, modify, and distribute this software in source code or binary
@@ -32,7 +32,7 @@ class FacebookAppTest extends \PHPUnit_Framework_TestCase
      */
     private $app;
 
-    public function setUp()
+    protected function setUp()
     {
         $this->app = new FacebookApp('id', 'secret');
     }
@@ -62,5 +62,20 @@ class FacebookAppTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Facebook\FacebookApp', $newApp);
         $this->assertEquals('id', $newApp->getId());
         $this->assertEquals('secret', $newApp->getSecret());
+    }
+
+    /**
+     * @expectedException \Facebook\Exceptions\FacebookSDKException
+     */
+    public function testOverflowIntegersWillThrow()
+    {
+        new FacebookApp(PHP_INT_MAX + 1, "foo");
+    }
+
+    public function testUnserializedIdsWillBeString()
+    {
+        $newApp = unserialize(serialize(new FacebookApp(1, "foo")));
+
+        $this->assertSame('1', $newApp->getId());
     }
 }
