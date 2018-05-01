@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2017 Facebook, Inc.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to
  * use, copy, modify, and distribute this software in source code or binary
@@ -29,36 +29,14 @@ use Facebook\FacebookApp;
 use Facebook\FacebookRequest;
 use Facebook\FacebookBatchRequest;
 use Facebook\FacebookClient;
-use Facebook\Http\GraphRawResponse;
-use Facebook\HttpClients\FacebookHttpClientInterface;
 use Facebook\FileUpload\FacebookFile;
 use Facebook\FileUpload\FacebookVideo;
 // These are needed when you uncomment the HTTP clients below.
 use Facebook\HttpClients\FacebookCurlHttpClient;
 use Facebook\HttpClients\FacebookGuzzleHttpClient;
 use Facebook\HttpClients\FacebookStreamHttpClient;
-
-class MyFooClientHandler implements FacebookHttpClientInterface
-{
-    public function send($url, $method, $body, array $headers, $timeOut)
-    {
-        return new GraphRawResponse(
-            "HTTP/1.1 200 OK\r\nDate: Mon, 19 May 2014 18:37:17 GMT",
-            '{"data":[{"id":"123","name":"Foo"},{"id":"1337","name":"Bar"}]}'
-        );
-    }
-}
-
-class MyFooBatchClientHandler implements FacebookHttpClientInterface
-{
-    public function send($url, $method, $body, array $headers, $timeOut)
-    {
-        return new GraphRawResponse(
-            "HTTP/1.1 200 OK\r\nDate: Mon, 19 May 2014 18:37:17 GMT",
-            '[{"code":"123","body":"Foo"},{"code":"1337","body":"Bar"}]'
-        );
-    }
-}
+use Facebook\Tests\Fixtures\MyFooBatchClientHandler;
+use Facebook\Tests\Fixtures\MyFooClientHandler;
 
 class FacebookClientTest extends \PHPUnit_Framework_TestCase
 {
@@ -82,7 +60,7 @@ class FacebookClientTest extends \PHPUnit_Framework_TestCase
      */
     public static $testFacebookClient;
 
-    public function setUp()
+    protected function setUp()
     {
         $this->fbApp = new FacebookApp('id', 'shhhh!');
         $this->fbClient = new FacebookClient(new MyFooClientHandler());
@@ -94,7 +72,7 @@ class FacebookClientTest extends \PHPUnit_Framework_TestCase
         $client = new FacebookClient($handler);
         $httpHandler = $client->getHttpClientHandler();
 
-        $this->assertInstanceOf('Facebook\Tests\MyFooClientHandler', $httpHandler);
+        $this->assertInstanceOf('Facebook\Tests\Fixtures\MyFooClientHandler', $httpHandler);
     }
 
     public function testTheHttpClientWillFallbackToDefault()
@@ -216,6 +194,14 @@ class FacebookClientTest extends \PHPUnit_Framework_TestCase
         $headersSent = $response->getRequest()->getHeaders();
 
         $this->assertContains('multipart/form-data; boundary=', $headersSent['Content-Type']);
+    }
+
+    public function testAFacebookRequestValidatesTheAccessTokenWhenOneIsNotProvided()
+    {
+        $this->setExpectedException('Facebook\Exceptions\FacebookSDKException');
+
+        $fbRequest = new FacebookRequest($this->fbApp, null, 'GET', '/foo');
+        $this->fbClient->sendRequest($fbRequest);
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2017 Facebook, Inc.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to
  * use, copy, modify, and distribute this software in source code or binary
@@ -41,7 +41,7 @@ class FacebookBatchResponseTest extends \PHPUnit_Framework_TestCase
      */
     protected $request;
 
-    public function setUp()
+    protected function setUp()
     {
         $this->app = new FacebookApp('123', 'foo_secret');
         $this->request = new FacebookRequest(
@@ -134,5 +134,31 @@ class FacebookBatchResponseTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('foo_token_one', $batchResponse[0]->getAccessToken());
         $this->assertEquals('foo_token_two', $batchResponse[1]->getAccessToken());
         $this->assertEquals('foo_token_three', $batchResponse[2]->getAccessToken());
+    }
+
+    public function testHeadersFromBatchRequestCanBeAccessed()
+    {
+        $graphResponseJson = '[';
+        $graphResponseJson .= '{"code":200,"headers":[{"name":"Facebook-API-Version","value":"v2.0"},{"name":"ETag","value":"\"fooTag\""}],"body":"{\"foo\":\"bar\"}"}';
+        $graphResponseJson .= ',{"code":200,"headers":[{"name":"Facebook-API-Version","value":"v2.5"},{"name":"ETag","value":"\"barTag\""}],"body":"{\"foo\":\"bar\"}"}';
+        $graphResponseJson .= ']';
+        $response = new FacebookResponse($this->request, $graphResponseJson, 200);
+
+        $requests = [
+            new FacebookRequest($this->app, 'foo_token_one', 'GET', '/me'),
+            new FacebookRequest($this->app, 'foo_token_two', 'GET', '/you'),
+        ];
+
+        $batchRequest = new FacebookBatchRequest($this->app, $requests);
+        $batchResponse = new FacebookBatchResponse($batchRequest, $response);
+
+        $this->assertEquals('v2.0', $batchResponse[0]->getGraphVersion());
+        $this->assertEquals('"fooTag"', $batchResponse[0]->getETag());
+        $this->assertEquals('v2.5', $batchResponse[1]->getGraphVersion());
+        $this->assertEquals('"barTag"', $batchResponse[1]->getETag());
+        $this->assertEquals([
+          'Facebook-API-Version' => 'v2.5',
+          'ETag' => '"barTag"',
+        ], $batchResponse[1]->getHeaders());
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2017 Facebook, Inc.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to
  * use, copy, modify, and distribute this software in source code or binary
@@ -23,12 +23,7 @@
  */
 namespace Facebook\Tests\PseudoRandomString;
 
-use Facebook\PseudoRandomString\PseudoRandomStringGeneratorTrait;
-
-class MyFooBarPseudoRandomStringGenerator
-{
-    use PseudoRandomStringGeneratorTrait;
-}
+use Facebook\Tests\Fixtures\MyFooBarPseudoRandomStringGenerator;
 
 class PseudoRandomStringGeneratorTraitTest extends \PHPUnit_Framework_TestCase
 {

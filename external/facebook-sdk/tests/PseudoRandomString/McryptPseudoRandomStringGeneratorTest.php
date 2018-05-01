@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2017 Facebook, Inc.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to
  * use, copy, modify, and distribute this software in source code or binary
@@ -29,6 +29,10 @@ class McryptPseudoRandomStringGeneratorTest extends \PHPUnit_Framework_TestCase
 {
     public function testCanGenerateRandomStringOfArbitraryLength()
     {
+        if (version_compare(PHP_VERSION, '7.1', '>=')) {
+            $this->markTestSkipped('Skipping test mcrypt is deprecated from 7.1');
+        }
+
         if (!function_exists('mcrypt_create_iv')) {
             $this->markTestSkipped(
                 'Mcrypt must be installed to test mcrypt_create_iv().'

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2017 Facebook, Inc.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to
  * use, copy, modify, and distribute this software in source code or binary
@@ -34,7 +34,7 @@ class FacebookResponseTest extends \PHPUnit_Framework_TestCase
      */
     protected $request;
 
-    public function setUp()
+    protected function setUp()
     {
         $app = new FacebookApp('123', 'foo_secret');
         $this->request = new FacebookRequest(

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2017 Facebook, Inc.
  *
  * You are hereby granted a non-exclusive, worldwide, royalty-free license to
  * use, copy, modify, and distribute this software in source code or binary
@@ -26,26 +26,10 @@ namespace Facebook\Tests\Helpers;
 use Facebook\Facebook;
 use Facebook\FacebookApp;
 use Facebook\FacebookClient;
-use Facebook\Authentication\OAuth2Client;
 use Facebook\Helpers\FacebookRedirectLoginHelper;
 use Facebook\PersistentData\FacebookMemoryPersistentDataHandler;
-use Facebook\PseudoRandomString\PseudoRandomStringGeneratorInterface;
-
-class FooPseudoRandomStringGenerator implements PseudoRandomStringGeneratorInterface
-{
-    public function getPseudoRandomString($length)
-    {
-        return 'csprs123';
-    }
-}
-
-class FooRedirectLoginOAuth2Client extends OAuth2Client
-{
-    public function getAccessTokenFromCode($code, $redirectUri = '', $machineId = null)
-    {
-        return 'foo_token_from_code|' . $code . '|' . $redirectUri;
-    }
-}
+use Facebook\Tests\Fixtures\FooPseudoRandomStringGenerator;
+use Facebook\Tests\Fixtures\FooRedirectLoginOAuth2Client;
 
 class FacebookRedirectLoginHelperTest extends \PHPUnit_Framework_TestCase
 {
@@ -60,8 +44,11 @@ class FacebookRedirectLoginHelperTest extends \PHPUnit_Framework_TestCase
     protected $redirectLoginHelper;
 
     const REDIRECT_URL = 'http://invalid.zzz';
+    const FOO_CODE = "foo_code";
+    const FOO_STATE = "foo_state";
+    const FOO_PARAM = "some_param=blah";
 
-    public function setUp()
+    protected function setUp()
     {
         $this->persistentDataHandler = new FacebookMemoryPersistentDataHandler();
 
@@ -110,12 +97,18 @@ class FacebookRedirectLoginHelperTest extends \PHPUnit_Framework_TestCase
     public function testAnAccessTokenCanBeObtainedFromRedirect()
     {
         $this->persistentDataHandler->set('state', 'foo_state');
-        $_GET['state'] = 'foo_state';
-        $_GET['code'] = 'foo_code';
+        $_GET['state'] = static::FOO_STATE;
+        $_GET['code'] = static::FOO_CODE;
 
-        $accessToken = $this->redirectLoginHelper->getAccessToken(self::REDIRECT_URL);
+        $fullUrl = self::REDIRECT_URL . '?state=' . static::FOO_STATE . '&code=' . static::FOO_CODE . '&' . static::FOO_PARAM;
 
-        $this->assertEquals('foo_token_from_code|foo_code|' . self::REDIRECT_URL, (string)$accessToken);
+        $accessToken = $this->redirectLoginHelper->getAccessToken($fullUrl);
+
+        // code and state should be stripped from the URL
+        $expectedUrl = self::REDIRECT_URL . '?' . static::FOO_PARAM;
+        $expectedString = 'foo_token_from_code|' . static::FOO_CODE . '|' . $expectedUrl;
+
+        $this->assertEquals($expectedString, $accessToken->getValue());
     }
 
     public function testACustomCsprsgCanBeInjected()

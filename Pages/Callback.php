@@ -16,6 +16,13 @@
             {
                 $this->gatekeeper(); // Logged-in users only
                 if ($facebook = \Idno\Core\site()->plugins()->get('Facebook')) {
+		    
+		    $errorcode = $this->getInput('error_message');
+		    if (!empty($errorcode)) {
+			\Idno\Core\Idno::site()->session()->addErrorMessage($errorcode);
+		    }
+			
+		    
                     if ($facebookAPI = $facebook->connect()) {
                         /* @var \IdnoPlugins\Facebook\FacebookAPI $facebookAPI */
                         if ($access_obj = $facebookAPI->getTokenOnLogin()) {
