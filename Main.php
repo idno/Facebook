@@ -88,10 +88,10 @@
                                         $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id'], $name, "", $name);
                                         $object->save();
                                     } else {
-                                        error_log("Nothing was posted to Facebook: " . var_export($result,true));
+                                        \Idno\Core\Idno::site()->logging()->error("Nothing was posted to Facebook: " . var_export($result,true));
                                     }
                                 } catch (\Exception $e) {
-                                    error_log('There was a problem posting to Facebook: ' . $e->getMessage());
+                                    \Idno\Core\Idno::site()->logging()->error('There was a problem posting to Facebook: ' . $e->getMessage());
                                     Idno::site()->session()->addMessage('There was a problem posting to Facebook: ' . $e->getMessage());
                                 }
                             }
@@ -123,10 +123,10 @@
                                     $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id'], $name, "", $name);
                                     $object->save();
                                 } else {
-                                    error_log("Nothing was posted to Facebook: " . var_export($result,true));
+                                    \Idno\Core\Idno::site()->logging()->error("Nothing was posted to Facebook: " . var_export($result,true));
                                 }
                             } catch (\Exception $e) {
-                                error_log('There was a problem posting to Facebook: ' . $e->getMessage());
+                                \Idno\Core\Idno::site()->logging()->error('There was a problem posting to Facebook: ' . $e->getMessage());
                                 Idno::site()->session()->addMessage('There was a problem posting to Facebook: ' . $e->getMessage());
                             }
                         }
@@ -186,10 +186,10 @@
                                     $object->setPosseLink('facebook', 'https://facebook.com/' . $result['id'], $name, "", $name);
                                     $object->save();
                                 } else {
-                                    error_log("Nothing was posted to Facebook: " . var_export($result,true));
+                                    \Idno\Core\Idno::site()->logging()->error("Nothing was posted to Facebook: " . var_export($result,true));
                                 }
                             } catch (\Exception $e) {
-                                error_log('There was a problem posting to Facebook: ' . $e->getMessage());
+                                \Idno\Core\Idno::site()->logging()->error('There was a problem posting to Facebook: ' . $e->getMessage());
                                 Idno::site()->session()->addMessage('There was a problem posting to Facebook: ' . $e->getMessage());
                             }
                         }
@@ -226,10 +226,10 @@
                                             $object->setPosseLink('facebook', 'https://facebook.com/' . $response['id'], $name, "", $name);
                                             $object->save();
                                         } else {
-                                            error_log("Nothing was posted to Facebook: " . var_export($result,true));
+                                            \Idno\Core\Idno::site()->logging()->error("Nothing was posted to Facebook: " . var_export($result,true));
                                         }
                                     } catch (\FacebookApiException $e) {
-                                        error_log('Could not post image to Facebook: ' . $e->getMessage());
+                                        \Idno\Core\Idno::site()->logging()->error('Could not post image to Facebook: ' . $e->getMessage());
                                     }
                                 }
                             }
