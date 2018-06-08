@@ -61,7 +61,7 @@
                                         <p>
                                             <input type="hidden" name="remove" value="<?= $account['username'] ?>"/>
                                             <button type="submit"
-                                                    class="connect fb connected"><i class="fa fab fa-facebook"></i>
+                                                    class="connect fb connected"><i class="fab fa-facebook"></i>
                                                 <?= $account['name'] ?> (Disconnect)
                                             </button>
                                             <?= \Idno\Core\site()->actions()->signForm('/account/facebook/') ?>
@@ -82,7 +82,7 @@
                                         <p>
                                             <input type="hidden" name="remove" value="1"/>
                                             <button type="submit" class="connect fb connected">
-                                                <i class="fa fab fa-facebook"></i>
+                                                <i class="fab fa-facebook"></i>
                                                 Disconnect Facebook
                                             </button>
                                             <?= \Idno\Core\site()->actions()->signForm('/account/facebook/') ?>
