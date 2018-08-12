@@ -3,6 +3,8 @@ Facebook for Known
 
 This plugin provides POSSE support for Known.
 
+*IMPORTANT NOTE* : Recent (c. Aug 2018) changes to the Facebook API means that posting from your site to your profile is NO LONGER POSSIBLE. Posting to pages currently is, but it remains to be seen how long that remains true.
+
 Installation
 ------------
 
